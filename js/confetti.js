@@ -1,4 +1,4 @@
-/* Tiny dependency-free confetti: paper strips, dots and hearts. */
+/* Tiny dependency-free confetti: paper strips and dots. */
 (function () {
   'use strict';
 
@@ -16,16 +16,6 @@
   addEventListener('resize', resize);
   resize();
 
-  function heart(x, y, s) {
-    ctx.beginPath();
-    ctx.moveTo(x, y + s * 0.3);
-    ctx.bezierCurveTo(x, y, x - s / 2, y, x - s / 2, y + s * 0.3);
-    ctx.bezierCurveTo(x - s / 2, y + s * 0.6, x, y + s * 0.8, x, y + s);
-    ctx.bezierCurveTo(x, y + s * 0.8, x + s / 2, y + s * 0.6, x + s / 2, y + s * 0.3);
-    ctx.bezierCurveTo(x + s / 2, y, x, y, x, y + s * 0.3);
-    ctx.fill();
-  }
-
   function spawn(x, y, angle, spread, count, colors) {
     for (var i = 0; i < count; i++) {
       var a = angle + (Math.random() - 0.5) * spread;
@@ -37,7 +27,7 @@
         size: 7 + Math.random() * 9,
         rot: Math.random() * Math.PI * 2,
         vr: (Math.random() - 0.5) * 0.3,
-        shape: Math.random() < 0.2 ? 'heart' : Math.random() < 0.5 ? 'dot' : 'strip',
+        shape: Math.random() < 0.35 ? 'dot' : 'strip',
         color: colors[Math.floor(Math.random() * colors.length)],
         life: 0,
         ttl: 220 + Math.random() * 120
@@ -60,8 +50,7 @@
       ctx.fillStyle = p.color;
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rot);
-      if (p.shape === 'heart') heart(0, -p.size / 2, p.size * 1.3);
-      else if (p.shape === 'dot') { ctx.beginPath(); ctx.arc(0, 0, p.size / 2.6, 0, Math.PI * 2); ctx.fill(); }
+      if (p.shape === 'dot') { ctx.beginPath(); ctx.arc(0, 0, p.size / 2.6, 0, Math.PI * 2); ctx.fill(); }
       else ctx.fillRect(-p.size / 2, -p.size / 5, p.size, p.size / 2.5);
       ctx.restore();
     });

@@ -78,6 +78,11 @@
   --gold-foil: linear-gradient(100deg, var(--gold-700) 0%, var(--gold-400) 22%, #f8ebc6 38%, var(--gold-500) 55%, var(--gold-700) 78%, var(--gold-400) 100%);
   --boy-grad: linear-gradient(145deg, var(--boy-100) 0%, var(--boy-300) 50%, var(--boy-500) 100%);
   --girl-grad: linear-gradient(145deg, var(--girl-100) 0%, var(--girl-300) 50%, var(--girl-400) 100%);
+  /* dusty, desaturated card colours: reads as stationery, not candy */
+  --boy-card: linear-gradient(172deg, #cbdaea 0%, #a5bdd6 55%, #8ca8c6 100%);
+  --girl-card: linear-gradient(172deg, #efd4d9 0%, #dcadb7 55%, #c9949f 100%);
+  --boy-ink: #2c4360;
+  --girl-ink: #6b3443;
 
   /* ---- typography ---- */
   --font-script: 'Pinyon Script', 'Ma Shan Zheng', cursive;

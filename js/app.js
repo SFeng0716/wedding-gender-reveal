@@ -7,8 +7,8 @@
   var CENTER = Board.CENTER;
   var LETTERS = 'ABCD';
   var COPY = {
-    boy: { title: "It's a Boy!", sub: '是男宝宝！💙', label: 'BOY', cn: '男宝宝', emoji: '💙', confetti: ['#a9c8ea', '#5e8fc7', '#d8e8f8', '#f3e2b3', '#c6a15b', '#ffffff'] },
-    girl: { title: "It's a Girl!", sub: '是女宝宝！💗', label: 'GIRL', cn: '女宝宝', emoji: '💗', confetti: ['#f5bccb', '#df7f9b', '#fde3ea', '#f3e2b3', '#c6a15b', '#ffffff'] }
+    boy: { title: "It's a Boy!", sub: '是男宝宝！', label: 'Boy', cn: '男宝宝', emoji: '💙', confetti: ['#a9bccf', '#c9d6e4', '#e9d3a0', '#c6a15b', '#fffaf0'] },
+    girl: { title: "It's a Girl!", sub: '是女宝宝！', label: 'Girl', cn: '女宝宝', emoji: '💗', confetti: ['#d3aeb5', '#ead3d6', '#e9d3a0', '#c6a15b', '#fffaf0'] }
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -374,7 +374,7 @@
       '<div class="seal" aria-hidden="true">' +
       '<div class="seal-half l">' + mono + '</div>' +
       '<div class="seal-half r">' + mono + '</div>' +
-      '<svg class="lock"><use href="#lock"/></svg></div>';
+      '</div>';
   }
 
   function buildBoard() {
@@ -395,7 +395,7 @@
       cell.innerHTML =
         '<div class="card">' +
         '<div class="face front envelope">' + ENVELOPE +
-        (golden ? sealMarkup() : '<span class="env-dot" aria-hidden="true"><svg><use href="#heart"/></svg></span>') +
+        (golden ? sealMarkup() : '<span class="env-dot" aria-hidden="true"></span>') +
         '</div>' +
         // The golden face is filled in only at reveal time, so the answer is not in the DOM before then.
         '<div class="face back' + (golden && !state.game.revealed[i] ? '' : ' ' + color) + '">' +
@@ -410,7 +410,7 @@
 
   function backFace(color) {
     var c = COPY[color];
-    return '<span class="label">' + c.label + '</span><svg class="heart-icon" aria-hidden="true"><use href="#heart"/></svg><span class="label-cn">' + c.cn + '</span>';
+    return '<span class="label">' + c.label + '</span><span class="rule" aria-hidden="true"></span><span class="label-cn">' + c.cn + '</span>';
   }
 
   function updateStatus() {
@@ -429,7 +429,7 @@
     if (state.game.finished) {
       var g = decodeSecret(state.secret);
       tagline.textContent = COPY[g].title + ' ' + COPY[g].sub;
-      progress.textContent = '🎉 揭晓完成';
+      progress.textContent = '揭晓完成';
     } else if (allOuter) {
       tagline.textContent = '最后的答案，就封在金色信封里……';
       progress.textContent = '✦ 可以拆金色信封了';
@@ -526,12 +526,9 @@
     }
     var a = centre(line[0]);
     var b = centre(line[2]);
-    // Extend a little past the outer cells' centres.
-    var dx = b.x - a.x, dy = b.y - a.y;
-    var len = Math.sqrt(dx * dx + dy * dy);
-    var ext = 0.12;
-    var x1 = a.x - dx * ext, y1 = a.y - dy * ext, x2 = b.x + dx * ext, y2 = b.y + dy * ext;
-    var total = len * (1 + 2 * ext);
+    // Stop at the outer cells' centres so the line never strikes their words.
+    var x1 = a.x, y1 = a.y, x2 = b.x, y2 = b.y;
+    var total = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     var deep = gender === 'boy' ? '#5e8fc7' : '#df7f9b';
     var w = cells[0].getBoundingClientRect().width;
 
@@ -612,7 +609,7 @@
           } else {
             btn.classList.add('wrong');
             btn.disabled = true;
-            feedback.textContent = '再想想～ 🤔';
+            feedback.textContent = '再想想～';
             feedback.className = 'q-feedback bad';
           }
         });
@@ -651,7 +648,7 @@
     }
 
     function succeed() {
-      feedback.textContent = golden ? '答对了！准备揭晓…… ✨' : '答对了！🎉';
+      feedback.textContent = golden ? '答对了！准备揭晓……' : '答对了！';
       feedback.className = 'q-feedback ok';
       $('qClose').hidden = true;
       setTimeout(function () {
@@ -747,25 +744,9 @@
     if ((e.key === 'f' || e.key === 'F') && !$('stage').hidden) toggleFullscreen();
   });
 
-  function spawnPetals() {
-    var box = document.querySelector('.petals');
-    for (var i = 0; i < 16; i++) {
-      var p = document.createElement('span');
-      p.className = 'petal' + (i % 3 === 0 ? ' alt' : '');
-      p.style.left = Math.random() * 100 + 'vw';
-      p.style.animationDuration = 12 + Math.random() * 14 + 's';
-      p.style.animationDelay = -Math.random() * 20 + 's';
-      var s = 0.6 + Math.random() * 0.8;
-      p.style.width = 14 * s + 'px';
-      p.style.height = 18 * s + 'px';
-      box.appendChild(p);
-    }
-  }
-
   // ---------- boot ----------
 
   bindSetup();
-  spawnPetals();
   if (state.game && decodeSecret(state.secret) && !validateSetup()) showStage();
   else showSetup();
 
