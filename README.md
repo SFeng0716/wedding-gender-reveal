@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.svg" width="140" alt="Wedding Gender Reveal logo"></p>
+
 # Wedding Gender Reveal 💍
 
 婚礼现场的宝宝性别揭晓小程序 —— 以井字棋（Tic-Tac-Toe）的方式，答对问题翻开格子，最后翻开中间的金色格子，连成一线揭晓宝宝是男孩还是女孩。
@@ -31,6 +33,14 @@
 
 - **选择题**：填写正确答案 + 1–3 个错误选项，选项会随机排列；选错会划掉，直到选对为止
 - **开放题**：错误选项留空，主持人点“揭晓答案”后判断来宾是否答对
+
+## Logo
+
+`assets/` 里有：
+- `logo.svg`：矢量原稿，任何尺寸都清晰
+- `logo-512.png`：512×512，可以当社交平台头像或分享图
+- `apple-touch-icon.png`：180×180，iPhone / iPad 添加到主屏幕时的图标
+- `favicon-32.png`：浏览器标签页小图标（不支持 SVG 图标的浏览器会用它）
 
 ## 开发
 
