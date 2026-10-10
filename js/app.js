@@ -351,7 +351,7 @@
 
   function backFace(color) {
     var c = COPY[color];
-    return '<span class="emoji">' + c.emoji + '</span><span class="text"><span class="label">' + c.label + '</span><span class="label-cn">' + c.cn + '</span></span>';
+    return '<svg class="heart-icon" aria-hidden="true"><use href="#heart"/></svg><span class="text"><span class="label">' + c.label + '</span><span class="label-cn">' + c.cn + '</span></span>';
   }
 
   function updateStatus() {

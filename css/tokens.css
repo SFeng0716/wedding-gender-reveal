@@ -1,0 +1,153 @@
+/*
+ * Design tokens.
+ *
+ * Structure follows the ui-design-system skill's token generator
+ * (50-900 colour scales, semantic + surface groups, major-third type scale,
+ * 8pt spacing grid, radius / shadow / motion / z-index scales). Colour values
+ * are hand-tuned: the generator's HSV ramp collapses 50-400 into one tint.
+ */
+:root {
+  /* ---- colour: brand gold ---- */
+  --gold-50: #fbf6ec;
+  --gold-100: #f6ead2;
+  --gold-200: #eedcb0;
+  --gold-300: #e3c88a;
+  --gold-400: #d6b26a;
+  --gold-500: #c6a15b;
+  --gold-600: #a8823a;
+  --gold-700: #8a682b;
+  --gold-800: #6b5020;
+  --gold-900: #4a3716;
+
+  /* ---- colour: boy blue ---- */
+  --boy-50: #f1f6fc;
+  --boy-100: #e1ecf8;
+  --boy-200: #c8dbf1;
+  --boy-300: #a9c8ea;
+  --boy-400: #8db4dd;
+  --boy-500: #6f9bd0;
+  --boy-600: #5683bd;
+  --boy-700: #456b9e;
+  --boy-800: #36547c;
+  --boy-900: #263b57;
+
+  /* ---- colour: girl pink ---- */
+  --girl-50: #fdf2f5;
+  --girl-100: #fbe3ea;
+  --girl-200: #f7cad6;
+  --girl-300: #f2b0c2;
+  --girl-400: #ec98b0;
+  --girl-500: #e07f9b;
+  --girl-600: #c9657f;
+  --girl-700: #a84f67;
+  --girl-800: #833d50;
+  --girl-900: #5c2b38;
+
+  /* ---- colour: warm neutral (ivory → ink) ---- */
+  --neutral-50: #fffdf9;
+  --neutral-100: #fbf6ee;
+  --neutral-200: #f3eadb;
+  --neutral-300: #eadfcd;
+  --neutral-400: #cdbba6;
+  --neutral-500: #a8968a;
+  --neutral-600: #8f7d72;
+  --neutral-700: #6b5a4f;
+  --neutral-800: #4b3a31;
+  --neutral-900: #2e231d;
+
+  /* ---- colour: semantic (muted to sit with the palette) ---- */
+  --success-light: #edf7ef;
+  --success: #6fa77a;
+  --success-dark: #3f7a4b;
+  --error-light: #fbf2f4;
+  --error: #c9667a;
+  --error-dark: #a8566a;
+  --info-light: #eef0f7;
+  --info-dark: #6b7391;
+
+  /* ---- colour: surface ---- */
+  --surface-background: var(--neutral-100);
+  --surface-card: var(--neutral-50);
+  --surface-foreground: var(--neutral-800);
+  --surface-muted: var(--neutral-600);
+  --surface-divider: var(--neutral-300);
+  --surface-overlay: rgba(46, 35, 29, .38);
+
+  /* ---- gradients ---- */
+  --gold-grad: linear-gradient(135deg, #f6e7bd 0%, var(--gold-400) 35%, var(--gold-500) 55%, var(--gold-700) 100%);
+  --gold-foil: linear-gradient(100deg, var(--gold-700) 0%, var(--gold-400) 22%, #f8ebc6 38%, var(--gold-500) 55%, var(--gold-700) 78%, var(--gold-400) 100%);
+  --boy-grad: linear-gradient(145deg, var(--boy-100) 0%, var(--boy-300) 50%, var(--boy-500) 100%);
+  --girl-grad: linear-gradient(145deg, var(--girl-100) 0%, var(--girl-300) 50%, var(--girl-400) 100%);
+
+  /* ---- typography ---- */
+  --font-script: 'Pinyon Script', 'Ma Shan Zheng', cursive;
+  --font-caps: 'Cinzel', 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+  --font-serif: 'Cormorant Garamond', 'Noto Serif SC', 'Songti SC', serif;
+  --font-display-cn: 'ZCOOL XiaoWei', 'Cormorant Garamond', 'Noto Serif SC', serif;
+  --font-brush-cn: 'Ma Shan Zheng', 'ZCOOL XiaoWei', cursive;
+
+  /* major third (1.25) from 16px */
+  --text-xs: 10px;
+  --text-sm: 13px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 25px;
+  --text-2xl: 31px;
+  --text-3xl: 39px;
+  --text-4xl: 49px;
+  --text-5xl: 61px;
+
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  --tracking-wide: .05em;
+  --tracking-wider: .12em;
+  --tracking-widest: .4em;
+
+  /* ---- spacing: 8pt grid ---- */
+  --space-0-5: 4px;
+  --space-1: 8px;
+  --space-1-5: 12px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+
+  /* ---- radius ("playful" scale) ---- */
+  --radius-sm: 8px;
+  --radius: 16px;
+  --radius-md: 20px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  /* ---- shadows (warm-tinted) ---- */
+  --shadow-sm: 0 1px 2px rgba(107, 80, 32, .08);
+  --shadow: 0 1px 3px rgba(107, 80, 32, .12), 0 1px 2px rgba(107, 80, 32, .07);
+  --shadow-md: 0 4px 10px -2px rgba(107, 80, 32, .14), 0 2px 4px -1px rgba(107, 80, 32, .08);
+  --shadow-lg: 0 12px 24px -6px rgba(107, 80, 32, .18), 0 4px 8px -2px rgba(107, 80, 32, .08);
+  --shadow-xl: 0 24px 40px -10px rgba(107, 80, 32, .22), 0 10px 16px -6px rgba(107, 80, 32, .08);
+  --shadow-gold: 0 8px 22px rgba(138, 104, 43, .35);
+
+  /* ---- motion ---- */
+  --duration-fast: 150ms;
+  --duration: 250ms;
+  --duration-slow: 350ms;
+  --duration-slower: 500ms;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-spring: cubic-bezier(.68, -.55, .265, 1.55);
+  --ease-flip: cubic-bezier(.3, 1.4, .5, 1);
+
+  /* ---- z-index ---- */
+  --z-base: 0;
+  --z-content: 1;
+  --z-sticky: 1020;
+  --z-overlay: 1030;
+  --z-modal: 1040;
+  --z-popover: 1050;
+  --z-notification: 1070;
+  --z-confetti: 1080;
+}
