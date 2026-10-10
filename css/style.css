@@ -224,6 +224,16 @@ input:focus, textarea:focus { outline: none; border-color: var(--gold-500); box-
 .wrong-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-1); }
 @media (max-width: 640px) { .wrong-inputs { grid-template-columns: 1fr; } }
 .wrong-inputs input { border-color: #ecd3d9; }
+.lang-pair { display: flex; flex-direction: column; gap: 6px; }
+.lang-pair .en-input { font-size: 15px; font-style: italic; background: #fdfbf7; }
+
+/* bilingual text in the question dialog: Chinese first, English below */
+.q-text .en { display: block; margin-top: .25em; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: .72em; color: var(--neutral-700); }
+.q-opt .opt-text { display: flex; flex-direction: column; }
+.q-opt .en { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: .85em; color: var(--neutral-700); }
+.q-opt.wrong .en { color: inherit; }
+.q-answer .q-answer-label { display: block; font-size: .5em; letter-spacing: .1em; color: var(--neutral-600); }
+.q-answer .en { display: block; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: .7em; }
 .q-item input.missing { border-color: var(--error); background: #fff5f6; }
 
 .legend-chips { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 var(--space-2); }

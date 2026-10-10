@@ -25,19 +25,52 @@
     };
   }
 
+  function threeSlots(list) {
+    var out = (list || []).slice(0, 3);
+    while (out.length < 3) out.push('');
+    return out;
+  }
+
+  // Every question carries Chinese and (optional) English text.
   function cloneQuestions(list) {
     return list.map(function (q) {
-      var wrong = (q.wrong || []).slice(0, 3);
-      while (wrong.length < 3) wrong.push('');
-      return { q: q.q || '', answer: q.answer || '', wrong: wrong };
+      return {
+        q: q.q || '', qEn: q.qEn || '',
+        answer: q.answer || '', answerEn: q.answerEn || '',
+        wrong: threeSlots(q.wrong), wrongEn: threeSlots(q.wrongEn)
+      };
     });
+  }
+
+  // Questions saved before English existed: an untouched sample question gets the sample's
+  // English; anything the couple wrote themselves is left for them to translate.
+  function addSampleEnglish(list) {
+    var samples = window.DEFAULT_QUESTIONS;
+    return list.map(function (q, i) {
+      var s = samples[i];
+      var untouched = s && !q.qEn && !q.answerEn && q.q === s.q && q.answer === s.answer &&
+        q.wrong.join('|') === threeSlots(s.wrong).join('|');
+      return untouched ? cloneQuestions([s])[0] : q;
+    });
+  }
+
+  function escapeHtml(text) {
+    return String(text).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; });
+  }
+
+  // Chinese on top, English underneath; shows one line when only one is given or both match.
+  function bilingual(zh, en) {
+    zh = (zh || '').trim();
+    en = (en || '').trim();
+    if (!zh || !en || zh === en) return '<span class="zh">' + escapeHtml(zh || en) + '</span>';
+    return '<span class="zh">' + escapeHtml(zh) + '</span><span class="en" lang="en">' + escapeHtml(en) + '</span>';
   }
 
   function load() {
     try {
       var saved = JSON.parse(localStorage.getItem(STORE_KEY));
       if (saved && Array.isArray(saved.questions) && saved.questions.length === QUESTION_COUNT) {
-        saved.questions = cloneQuestions(saved.questions);
+        saved.questions = addSampleEnglish(cloneQuestions(saved.questions));
         // A gender saved before passwords existed has to be picked again behind one.
         if (saved.secret && !(saved.lock && saved.lock.hash)) {
           saved.secret = '';
@@ -130,31 +163,39 @@
       li.className = 'q-item' + (golden ? ' golden' : '');
       li.innerHTML =
         '<header><span>' + (golden ? '✦ 第 9 题 · 金色格子（最后揭晓）' : '第 ' + (i + 1) + ' 题') + '</span><span class="q-type"></span></header>' +
-        '<label class="field"><span class="field-label">问题 <em>Question</em></span><input data-field="q" placeholder="例如：我们是在哪里认识的？"></label>' +
+        '<div class="field"><span class="field-label">问题 <em>Question</em></span>' +
+        '<div class="lang-pair"><input data-field="q" placeholder="中文：我们是在哪里认识的？" aria-label="中文问题">' +
+        '<input data-field="qEn" class="en-input" lang="en" placeholder="English: Where did we first meet?" aria-label="英文问题"></div></div>' +
         '<div class="answer-grid">' +
-        '<label class="answer-box correct"><span class="field-label"><i class="mark">✓</i>正确答案 <em>必填</em></span>' +
-        '<input data-field="answer" placeholder="填写正确答案"></label>' +
+        '<div class="answer-box correct"><span class="field-label"><i class="mark">✓</i>正确答案 <em>必填</em></span>' +
+        '<div class="lang-pair"><input data-field="answer" placeholder="中文" aria-label="正确答案（中文）">' +
+        '<input data-field="answerEn" class="en-input" lang="en" placeholder="English（可选）" aria-label="正确答案（英文）"></div></div>' +
         '<div class="answer-box wrong"><span class="field-label"><i class="mark">✗</i>错误选项 <em>可选，最多 3 个</em></span>' +
         '<div class="wrong-inputs">' +
-        '<input data-field="wrong" data-w="0" placeholder="错误选项 1" aria-label="错误选项 1">' +
-        '<input data-field="wrong" data-w="1" placeholder="错误选项 2" aria-label="错误选项 2">' +
-        '<input data-field="wrong" data-w="2" placeholder="错误选项 3" aria-label="错误选项 3">' +
+        [0, 1, 2].map(function (w) {
+          return '<div class="lang-pair">' +
+            '<input data-field="wrong" data-w="' + w + '" placeholder="错误选项 ' + (w + 1) + '" aria-label="错误选项 ' + (w + 1) + '（中文）">' +
+            '<input data-field="wrongEn" data-w="' + w + '" class="en-input" lang="en" placeholder="English" aria-label="错误选项 ' + (w + 1) + '（英文）"></div>';
+        }).join('') +
         '</div></div></div>';
       var typeChip = li.querySelector('.q-type');
       function refresh() {
-        var n = q.wrong.filter(function (w) { return w.trim(); }).length;
+        var n = q.wrong.filter(function (w, k) { return w.trim() || q.wrongEn[k].trim(); }).length;
         typeChip.textContent = n ? '选择题 · ' + (n + 1) + ' 个选项' : '开放题 · 主持人判断';
         typeChip.classList.toggle('open', !n);
-        li.querySelector('[data-field="q"]').classList.toggle('missing', !q.q.trim());
-        li.querySelector('[data-field="answer"]').classList.toggle('missing', !q.answer.trim());
+        var noQ = !q.q.trim() && !q.qEn.trim();
+        var noA = !q.answer.trim() && !q.answerEn.trim();
+        li.querySelectorAll('[data-field="q"], [data-field="qEn"]').forEach(function (el) { el.classList.toggle('missing', noQ); });
+        li.querySelectorAll('[data-field="answer"], [data-field="answerEn"]').forEach(function (el) { el.classList.toggle('missing', noA); });
       }
       li.querySelectorAll('input').forEach(function (input) {
         var field = input.dataset.field;
         var w = Number(input.dataset.w);
-        input.maxLength = field === 'q' ? 80 : 30;
-        input.value = field === 'wrong' ? q.wrong[w] : q[field];
+        var isList = field === 'wrong' || field === 'wrongEn';
+        input.maxLength = field === 'q' || field === 'qEn' ? 100 : 40;
+        input.value = isList ? q[field][w] : q[field];
         input.addEventListener('input', function () {
-          if (field === 'wrong') q.wrong[w] = input.value;
+          if (isList) q[field][w] = input.value;
           else q[field] = input.value;
           refresh();
           save();
@@ -170,7 +211,7 @@
     if (!decodeSecret(state.secret) || !state.lock) return '请先设置密码并选择宝宝的性别';
     for (var i = 0; i < state.questions.length; i++) {
       var q = state.questions[i];
-      if (!q.q.trim() || !q.answer.trim()) return '第 ' + (i + 1) + ' 题还没有填写问题或正确答案';
+      if ((!q.q.trim() && !q.qEn.trim()) || (!q.answer.trim() && !q.answerEn.trim())) return '第 ' + (i + 1) + ' 题还没有填写问题或正确答案';
     }
     return '';
   }
@@ -564,7 +605,7 @@
     var card = document.querySelector('#qModal .modal-card');
     card.classList.toggle('golden', golden);
     $('qBadge').textContent = golden ? '✦ Golden Question · 最后一题' : 'Question ' + (qIndex + 1) + ' · 第 ' + (qIndex + 1) + ' 题';
-    $('qText').textContent = q.q;
+    $('qText').innerHTML = bilingual(q.q, q.qEn);
     var feedback = $('qFeedback');
     feedback.textContent = '';
     feedback.className = 'q-feedback';
@@ -572,25 +613,26 @@
     box.innerHTML = '';
     modalDone = onCorrect;
 
-    var wrong = q.wrong.map(function (w) { return w.trim(); }).filter(Boolean);
+    // Options are judged by which one they are, not by their text, so either language works.
+    var wrong = q.wrong.map(function (zh, k) { return { zh: zh, en: q.wrongEn[k], correct: false }; })
+      .filter(function (o) { return o.zh.trim() || o.en.trim(); });
     if (wrong.length) {
-      var options = shuffle([q.answer.trim()].concat(wrong));
+      var options = shuffle([{ zh: q.answer, en: q.answerEn, correct: true }].concat(wrong));
       box.className = 'q-options';
-      options.forEach(function (text, k) {
+      options.forEach(function (opt, k) {
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'q-opt';
-        btn.innerHTML = '<span class="letter">' + LETTERS[k] + '</span>';
-        btn.appendChild(document.createTextNode(text));
+        btn.innerHTML = '<span class="letter">' + LETTERS[k] + '</span><span class="opt-text">' + bilingual(opt.zh, opt.en) + '</span>';
         btn.addEventListener('click', function () {
-          if (text === q.answer.trim()) {
+          if (opt.correct) {
             btn.classList.add('correct');
             box.querySelectorAll('.q-opt').forEach(function (b) { b.disabled = true; });
             succeed();
           } else {
             btn.classList.add('wrong');
             btn.disabled = true;
-            feedback.textContent = '再想想～ 🤔';
+            feedback.textContent = '再想想～ Try again 🤔';
             feedback.className = 'q-feedback bad';
           }
         });
@@ -602,23 +644,23 @@
       var revealBtn = document.createElement('button');
       revealBtn.type = 'button';
       revealBtn.className = 'btn ghost';
-      revealBtn.textContent = '揭晓答案';
+      revealBtn.textContent = '揭晓答案 · Reveal answer';
       revealBtn.addEventListener('click', function () {
         box.innerHTML = '';
         var ans = document.createElement('p');
         ans.className = 'q-answer';
-        ans.textContent = '答案：' + q.answer;
+        ans.innerHTML = '<span class="q-answer-label">答案 Answer</span>' + bilingual(q.answer, q.answerEn);
         var actions = document.createElement('div');
         actions.className = 'q-actions';
         var yes = document.createElement('button');
         yes.type = 'button';
         yes.className = 'btn primary';
-        yes.textContent = '答对了 ✓ 翻开格子';
+        yes.textContent = '答对了 ✓ Correct';
         yes.addEventListener('click', function () { yes.disabled = true; succeed(); });
         var no = document.createElement('button');
         no.type = 'button';
         no.className = 'btn ghost';
-        no.textContent = '没答对 ✗';
+        no.textContent = '没答对 ✗ Not quite';
         no.addEventListener('click', closeModal);
         actions.appendChild(yes);
         actions.appendChild(no);
@@ -629,7 +671,7 @@
     }
 
     function succeed() {
-      feedback.textContent = golden ? '答对了！准备揭晓…… ✨' : '答对了！🎉';
+      feedback.textContent = golden ? '答对了！Correct! 准备揭晓…… ✨' : '答对了！Correct! 🎉';
       feedback.className = 'q-feedback ok';
       $('qClose').hidden = true;
       setTimeout(function () {
