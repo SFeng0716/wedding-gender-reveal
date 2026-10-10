@@ -90,14 +90,25 @@
       var li = document.createElement('li');
       li.className = 'q-item' + (golden ? ' golden' : '');
       li.innerHTML =
-        '<header>' + (golden ? '✦ 第 9 题 · 金色格子（最后揭晓）' : '第 ' + (i + 1) + ' 题') + '</header>' +
-        '<div class="row"><input data-field="q" placeholder="问题"></div>' +
-        '<div class="answers">' +
-        '<input class="answer" data-field="answer" placeholder="✓ 正确答案">' +
-        '<input data-field="wrong" data-w="0" placeholder="错误选项（可选）">' +
-        '<input data-field="wrong" data-w="1" placeholder="错误选项（可选）">' +
-        '<input data-field="wrong" data-w="2" placeholder="错误选项（可选）">' +
-        '</div>';
+        '<header><span>' + (golden ? '✦ 第 9 题 · 金色格子（最后揭晓）' : '第 ' + (i + 1) + ' 题') + '</span><span class="q-type"></span></header>' +
+        '<label class="field"><span class="field-label">问题 <em>Question</em></span><input data-field="q" placeholder="例如：我们是在哪里认识的？"></label>' +
+        '<div class="answer-grid">' +
+        '<label class="answer-box correct"><span class="field-label"><i class="mark">✓</i>正确答案 <em>必填</em></span>' +
+        '<input data-field="answer" placeholder="填写正确答案"></label>' +
+        '<div class="answer-box wrong"><span class="field-label"><i class="mark">✗</i>错误选项 <em>可选，最多 3 个</em></span>' +
+        '<div class="wrong-inputs">' +
+        '<input data-field="wrong" data-w="0" placeholder="错误选项 1" aria-label="错误选项 1">' +
+        '<input data-field="wrong" data-w="1" placeholder="错误选项 2" aria-label="错误选项 2">' +
+        '<input data-field="wrong" data-w="2" placeholder="错误选项 3" aria-label="错误选项 3">' +
+        '</div></div></div>';
+      var typeChip = li.querySelector('.q-type');
+      function refresh() {
+        var n = q.wrong.filter(function (w) { return w.trim(); }).length;
+        typeChip.textContent = n ? '选择题 · ' + (n + 1) + ' 个选项' : '开放题 · 主持人判断';
+        typeChip.classList.toggle('open', !n);
+        li.querySelector('[data-field="q"]').classList.toggle('missing', !q.q.trim());
+        li.querySelector('[data-field="answer"]').classList.toggle('missing', !q.answer.trim());
+      }
       li.querySelectorAll('input').forEach(function (input) {
         var field = input.dataset.field;
         var w = Number(input.dataset.w);
@@ -106,9 +117,11 @@
         input.addEventListener('input', function () {
           if (field === 'wrong') q.wrong[w] = input.value;
           else q[field] = input.value;
+          refresh();
           save();
         });
       });
+      refresh();
       list.appendChild(li);
     });
   }
