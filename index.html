@@ -53,6 +53,30 @@
           <circle cx="72" cy="63" r="2.6"/><circle cx="92" cy="47" r="2"/><circle cx="97" cy="52" r="1.4"/>
         </g>
       </symbol>
+      <!-- gold foil for the golden envelope (used through --env-* in the cell) -->
+      <linearGradient id="foil-body" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#8a6a2f"/><stop offset=".22" stop-color="#d9b46a"/><stop offset=".42" stop-color="#f7e6b8"/>
+        <stop offset=".6" stop-color="#c99c4a"/><stop offset=".82" stop-color="#e8cd8c"/><stop offset="1" stop-color="#7a5a24"/>
+      </linearGradient>
+      <linearGradient id="foil-fold" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#7a5a24"/><stop offset=".4" stop-color="#c99c4a"/><stop offset=".65" stop-color="#ecd29a"/><stop offset="1" stop-color="#8a6a2f"/>
+      </linearGradient>
+      <linearGradient id="foil-flap" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#b8913f"/><stop offset=".35" stop-color="#f3dfaa"/><stop offset=".55" stop-color="#d6b26a"/><stop offset="1" stop-color="#9c7630"/>
+      </linearGradient>
+      <!-- envelope body: side and bottom folds meeting under the flap -->
+      <symbol id="env-body" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <rect width="100" height="100" style="fill: var(--env-paper)"/>
+        <path d="M0 0 L50 57 L0 100 Z" style="fill: var(--env-fold)"/>
+        <path d="M100 0 L50 57 L100 100 Z" style="fill: var(--env-fold)"/>
+        <path d="M0 100 L50 52 L100 100 Z" style="fill: var(--env-paper)"/>
+        <path d="M0 100 L50 52 L100 100" fill="none" style="stroke: var(--env-edge)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+      </symbol>
+      <!-- flap: hinged on the top edge, opens towards the viewer -->
+      <symbol id="env-flap" viewBox="0 0 100 60" preserveAspectRatio="none">
+        <path d="M0 0 H100 L55 55 Q50 60 45 55 Z" style="fill: var(--env-flap)"/>
+        <path d="M0 0 L45 55 Q50 60 55 55 L100 0" fill="none" style="stroke: var(--env-edge)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
+      </symbol>
       <symbol id="heart" viewBox="0 0 24 24">
         <path d="M12 21.2S4.4 16.6 1.9 11.8C.2 8.4 2.2 3.8 6.4 3.8c2.3 0 3.9 1.3 5.6 3.4 1.7-2.1 3.3-3.4 5.6-3.4 4.2 0 6.2 4.6 4.5 8C19.6 16.6 12 21.2 12 21.2z"/>
       </symbol>
@@ -135,7 +159,7 @@
       <section class="step">
         <h2><span class="step-no">3</span>闯关问题 <small>Questions</small></h2>
         <p class="hint">
-          第 1–8 题按翻牌顺序出现，第 9 题用来解锁中间的<b class="gold-text">金色格子</b>。
+          第 1–8 题按拆信顺序出现，第 9 题用来解锁中间的<b class="gold-text">金色信封</b>。
           填了错误选项就是<b>选择题</b>（选项会随机排列）；错误选项全部留空就是<b>开放题</b>，由主持人判断对错。
         </p>
         <div class="legend-chips">
@@ -168,7 +192,7 @@
       <h1 class="couple script"><span id="nameA" class="names"></span> <span class="amp">&amp;</span> <span id="nameB" class="names"></span></h1>
       <p class="subtitle">Gender Reveal</p>
       <svg class="flourish"><use href="#flourish"/></svg>
-      <p id="tagline" class="tagline">Boy or Girl? 答对问题，翻开格子</p>
+      <p id="tagline" class="tagline">Boy or Girl? 答对问题，拆开信封</p>
     </header>
 
     <div class="board-wrap">
@@ -213,13 +237,13 @@
         <h3><span class="step-no">1</span>婚礼前：填好设置</h3>
         <ol>
           <li>用 <b>Chrome 或 Edge</b> 打开 <code>index.html</code>。最好就在<b>婚礼当天要投屏的那台电脑</b>上设置，因为所有内容只存在这台电脑的浏览器里。</li>
-          <li><b>新人名字</b>：填新郎和新娘的名字，标题会变成「新郎 &amp; 新娘 Gender Reveal」。</li>
+          <li><b>新人名字</b>：填新郎和新娘的名字，标题会变成「新郎 &amp; 新娘 Gender Reveal」，金色信封的火漆上也会印上两人名字的首字。</li>
           <li><b>宝宝性别</b>：由新娘先设一个密码（至少 4 位，输入两次），再点选男宝宝或女宝宝。选完就锁住，之后要看或修改都需要输入这个密码。想连新人都保密的话，可以把这一步交给医生或好友。</li>
           <li><b>闯关问题</b>：把 9 道示例题改成你们自己的故事。
             <ul>
               <li><span class="chip correct"><i class="mark">✓</i>绿色框</span> 填正确答案（必填）</li>
               <li><span class="chip wrong"><i class="mark">✗</i>粉色框</span> 填错误选项：填了就是选择题；全部留空就是开放题，由主持人判断对错</li>
-              <li>第 1–8 题按翻牌的先后顺序出现，和点哪个格子无关；第 9 题专门用来开中间的金色格子</li>
+              <li>第 1–8 题按拆信的先后顺序出现，和点哪封信无关；第 9 题专门用来开中间的金色信封</li>
             </ul>
           </li>
         </ol>
@@ -237,12 +261,12 @@
       <section class="guide-step">
         <h3><span class="step-no">3</span>揭晓流程（主持人操作）</h3>
         <ol>
-          <li>请来宾选一个格子，点下去就会出现问题。中间的金色格子要等外围 8 格全部翻开才能点。</li>
-          <li><b>选择题</b>：来宾喊出答案后，点对应的选项。选错的会被划掉，可以继续猜；选对了格子就会翻开。</li>
-          <li><b>开放题</b>：先让来宾回答，再点「揭晓答案」，然后选「答对了 ✓ 翻开格子」或「没答对」。</li>
-          <li>答不出来可以点「稍后再答」，先换一个格子。</li>
-          <li>外围固定是 4 蓝 4 粉，而且怎么排都不会提前连成一条线，所以翻完 8 格也猜不到答案。</li>
-          <li>最后答对第 9 题：3、2、1 倒数，金色格子翻开，连成一条线，彩带落下，揭晓宝宝性别。点「查看棋盘」可以回到棋盘。</li>
+          <li>请来宾选一封信，点下去就会出现问题。中间的金色信封要等外围 8 封信全部拆开才能点。</li>
+          <li><b>选择题</b>：来宾喊出答案后，点对应的选项。选错的会被划掉，可以继续猜；选对了信封就会拆开，滑出一张蓝色或粉色的卡片。</li>
+          <li><b>开放题</b>：先让来宾回答，再点「揭晓答案」，然后选「答对了 ✓ 拆开信封」或「没答对」。</li>
+          <li>答不出来可以点「稍后再答」，先换一封信。</li>
+          <li>外围固定是 4 蓝 4 粉，而且怎么排都不会提前连成一条线，所以拆完 8 封也猜不到答案。</li>
+          <li>最后答对第 9 题：3、2、1 倒数，火漆裂开、金色信封打开，连成一条线，彩带落下，揭晓宝宝性别。点「查看棋盘」可以回到棋盘。</li>
         </ol>
       </section>
 

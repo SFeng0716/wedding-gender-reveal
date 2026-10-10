@@ -129,7 +129,7 @@
       var li = document.createElement('li');
       li.className = 'q-item' + (golden ? ' golden' : '');
       li.innerHTML =
-        '<header><span>' + (golden ? '✦ 第 9 题 · 金色格子（最后揭晓）' : '第 ' + (i + 1) + ' 题') + '</span><span class="q-type"></span></header>' +
+        '<header><span>' + (golden ? '✦ 第 9 题 · 金色信封（最后揭晓）' : '第 ' + (i + 1) + ' 题') + '</span><span class="q-type"></span></header>' +
         '<label class="field"><span class="field-label">问题 <em>Question</em></span><input data-field="q" placeholder="例如：我们是在哪里认识的？"></label>' +
         '<div class="answer-grid">' +
         '<label class="answer-box correct"><span class="field-label"><i class="mark">✓</i>正确答案 <em>必填</em></span>' +
@@ -227,7 +227,7 @@
     $('pwForgot').addEventListener('click', function () {
       askConfirm({
         title: '忘记密码？',
-        text: '密码无法找回，只能清除当前的性别选择，重新设置密码再选。翻牌进度也会一起清除。',
+        text: '密码无法找回，只能清除当前的性别选择，重新设置密码再选。拆信进度也会一起清除。',
         ok: '清除并重新选择',
         danger: true
       }).then(function (yes) { if (yes) forgetGender(); });
@@ -253,7 +253,7 @@
         genderMsg('已改成 ' + COPY[next].cn, true);
       }
       if (!state.game) return apply();
-      askConfirm({ title: '改成' + COPY[next].cn + '？', text: '修改性别会清空当前的翻牌进度。', ok: '确定修改' })
+      askConfirm({ title: '改成' + COPY[next].cn + '？', text: '修改性别会清空当前的拆信进度。', ok: '确定修改' })
         .then(function (yes) { if (yes) apply(); });
     });
 
@@ -300,7 +300,7 @@
         showStage();
       }
       if (!(state.game && !state.game.finished)) return start();
-      askConfirm({ title: '开始新的一局？', text: '当前的翻牌进度会清空，棋盘会重新洗牌。想接着玩请点「继续当前进度」。', ok: '重新开始' })
+      askConfirm({ title: '开始新的一局？', text: '当前的拆信进度会清空，棋盘会重新洗牌。想接着玩请点「继续当前进度」。', ok: '重新开始' })
         .then(function (yes) { if (yes) start(); });
     });
 
@@ -309,7 +309,7 @@
     $('resetAll').addEventListener('click', function () {
       askConfirm({
         title: '全部重置？',
-        text: '名字、宝宝性别和密码、9 道题目、翻牌进度都会清除，回到一开始的样子（题目恢复成示例）。这个操作不能撤销。',
+        text: '名字、宝宝性别和密码、9 道题目、拆信进度都会清除，回到一开始的样子（题目恢复成示例）。这个操作不能撤销。',
         ok: '全部重置',
         danger: true
       }).then(function (yes) {
@@ -355,6 +355,28 @@
     scrollTo(0, 0);
   }
 
+  function initial(name) {
+    return (Array.from(name.trim())[0] || '').toUpperCase();
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; });
+  }
+
+  var ENVELOPE =
+    '<svg class="env-body" aria-hidden="true"><use href="#env-body"/></svg>' +
+    '<svg class="env-flap" aria-hidden="true"><use href="#env-flap"/></svg>';
+
+  // Gold wax seal pressed with the couple's initials; two halves so it can break apart.
+  function sealMarkup() {
+    var mono = '<span class="monogram">' + escapeHtml(initial(state.names.groom) + '&' + initial(state.names.bride)) + '</span>';
+    return '<span class="shine-wrap" aria-hidden="true"></span>' +
+      '<div class="seal" aria-hidden="true">' +
+      '<div class="seal-half l">' + mono + '</div>' +
+      '<div class="seal-half r">' + mono + '</div>' +
+      '<svg class="lock"><use href="#lock"/></svg></div>';
+  }
+
   function buildBoard() {
     var board = $('board');
     var gender = decodeSecret(state.secret);
@@ -372,9 +394,9 @@
       cell.setAttribute('role', 'gridcell');
       cell.innerHTML =
         '<div class="card">' +
-        (golden
-          ? '<div class="face front"><span class="shine"></span><span class="star">✦</span><span class="golden-label">Golden</span><svg class="lock"><use href="#lock"/></svg></div>'
-          : '<div class="face front"><span class="q">?</span><span class="heart">♥</span></div>') +
+        '<div class="face front envelope">' + ENVELOPE +
+        (golden ? sealMarkup() : '<span class="env-dot" aria-hidden="true"><svg><use href="#heart"/></svg></span>') +
+        '</div>' +
         // The golden face is filled in only at reveal time, so the answer is not in the DOM before then.
         '<div class="face back' + (golden && !state.game.revealed[i] ? '' : ' ' + color) + '">' +
         (golden && !state.game.revealed[i] ? '' : backFace(color)) +
@@ -397,9 +419,9 @@
     var allOuter = n === Board.OUTER.length;
     golden.classList.toggle('locked', !allOuter);
     golden.classList.toggle('ready', allOuter && !state.game.revealed[CENTER]);
-    golden.setAttribute('aria-label', allOuter ? '金色格子' : '金色格子（未解锁）');
+    golden.setAttribute('aria-label', allOuter ? '金色信封' : '金色信封（还不能拆）');
     cells.forEach(function (c, i) {
-      if (i !== CENTER) c.setAttribute('aria-label', state.game.revealed[i] ? COPY[state.game.layout[i]].cn : '未翻开的格子');
+      if (i !== CENTER) c.setAttribute('aria-label', state.game.revealed[i] ? COPY[state.game.layout[i]].cn : '还没拆的信封');
     });
 
     var tagline = $('tagline');
@@ -409,11 +431,11 @@
       tagline.textContent = COPY[g].title + ' ' + COPY[g].sub;
       progress.textContent = '🎉 揭晓完成';
     } else if (allOuter) {
-      tagline.textContent = '最后的答案，就藏在金色格子里……';
-      progress.textContent = '✦ 金色格子已解锁';
+      tagline.textContent = '最后的答案，就封在金色信封里……';
+      progress.textContent = '✦ 可以拆金色信封了';
     } else {
-      tagline.textContent = 'Boy or Girl? 答对问题，翻开格子';
-      progress.textContent = '已翻开 ' + n + ' / 8';
+      tagline.textContent = 'Boy or Girl? 答对问题，拆开信封';
+      progress.textContent = '已拆开 ' + n + ' / 8 封';
     }
   }
 
@@ -424,7 +446,7 @@
     if (state.game.revealed[i]) return;
     if (i === CENTER && outerRevealedCount() < Board.OUTER.length) {
       shake(cell);
-      toast('先翻开外围的 8 个格子，金色格子留到最后 ✦');
+      toast('先拆开外围的 8 封信，金色信封留到最后 ✦');
       return;
     }
     var qIndex = i === CENTER ? GOLDEN_Q : outerRevealedCount();
@@ -445,7 +467,7 @@
     cells[i].classList.add('revealed');
     updateStatus();
     if (outerRevealedCount() === Board.OUTER.length) {
-      setTimeout(function () { toast('外围全部翻开！是男是女，还看金色格子 ✦'); }, 900);
+      setTimeout(function () { toast('8 封信都拆开了！是男是女，就看金色信封 ✦'); }, 1300);
     }
   }
 
@@ -468,13 +490,13 @@
         save();
         drawLine(true);
         updateStatus();
-      }, 1000);
+      }, 1700);
 
       setTimeout(function () {
         Confetti.celebrate(COPY[gender].confetti, 1);
         showResult(gender);
         busy = false;
-      }, 2200);
+      }, 3000);
     });
   }
 
@@ -613,7 +635,7 @@
         var yes = document.createElement('button');
         yes.type = 'button';
         yes.className = 'btn primary';
-        yes.textContent = '答对了 ✓ 翻开格子';
+        yes.textContent = '答对了 ✓ 拆开信封';
         yes.addEventListener('click', function () { yes.disabled = true; succeed(); });
         var no = document.createElement('button');
         no.type = 'button';
@@ -670,7 +692,7 @@
   $('fullscreenBtn').addEventListener('click', toggleFullscreen);
   $('settingsBtn').addEventListener('click', function () {
     if (busy) return;
-    askConfirm({ title: '返回设置页面？', text: '宝宝性别在设置页是用密码锁住的，翻牌进度会保留。', ok: '去设置' })
+    askConfirm({ title: '返回设置页面？', text: '宝宝性别在设置页是用密码锁住的，拆信进度会保留。', ok: '去设置' })
       .then(function (yes) { if (yes) showSetup(); });
   });
 
