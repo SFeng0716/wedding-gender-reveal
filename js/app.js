@@ -674,6 +674,25 @@
       .then(function (yes) { if (yes) showSetup(); });
   });
 
+  // ---------- user guide ----------
+
+  var GUIDE_SEEN_KEY = 'wedding-gender-reveal:guide-seen';
+
+  function openGuide() {
+    $('guideModal').hidden = false;
+    $('guideModal').querySelector('.guide-card').scrollTop = 0;
+    $('guideDone').focus();
+  }
+  function closeGuide() {
+    $('guideModal').hidden = true;
+    try { localStorage.setItem(GUIDE_SEEN_KEY, '1'); } catch (e) { /* ignore */ }
+  }
+  $('guideBtn').addEventListener('click', openGuide);
+  $('guideBtnStage').addEventListener('click', openGuide);
+  $('guideClose').addEventListener('click', closeGuide);
+  $('guideDone').addEventListener('click', closeGuide);
+  $('guideModal').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeGuide(); });
+
   // In-page replacement for window.confirm(): some embedded browsers (and
   // screen-share tools) suppress native dialogs, which made buttons look dead.
   var confirmResolve = null;
@@ -700,6 +719,7 @@
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && !$('confirmModal').hidden) return settleConfirm(false);
+    if (e.key === 'Escape' && !$('guideModal').hidden) return closeGuide();
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.key === 'Escape' && !$('qModal').hidden && !$('qClose').hidden) closeModal();
     if ((e.key === 'f' || e.key === 'F') && !$('stage').hidden) toggleFullscreen();
@@ -726,4 +746,9 @@
   spawnPetals();
   if (state.game && decodeSecret(state.secret) && !validateSetup()) showStage();
   else showSetup();
+
+  // First visit on this computer: show the guide once.
+  var guideSeen = true;
+  try { guideSeen = !!localStorage.getItem(GUIDE_SEEN_KEY); } catch (e) { /* storage blocked: don't nag */ }
+  if (!guideSeen && $('stage').hidden) openGuide();
 })();

@@ -448,6 +448,41 @@ body.suspense .stage-head, body.suspense .stage-foot, body.suspense .cell:not(.g
 .q-feedback.ok { color: var(--success-dark); }
 .q-feedback.bad { color: var(--error); }
 
+/* ---------- user guide ---------- */
+.guide-btn { margin-top: var(--space-1); }
+.guide-modal { align-items: start; overflow-y: auto; }
+.guide-card {
+  width: min(760px, 100%);
+  margin: var(--space-3) auto;
+  padding: var(--space-6) clamp(var(--space-3), 5vw, var(--space-6)) var(--space-4);
+  text-align: left;
+  animation: popIn var(--duration-slow) var(--ease-flip);
+}
+.guide-close {
+  position: absolute; top: var(--space-2); right: var(--space-2); z-index: 1;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--surface-divider); background: var(--surface-card);
+  font-size: var(--text-xl); line-height: 1; color: var(--surface-muted);
+}
+.guide-head { text-align: center; margin-bottom: var(--space-3); }
+.guide-head h2 { margin: 0; font-family: var(--font-display-cn); font-weight: 400; font-size: var(--text-3xl); color: var(--gold-700); }
+.guide-head p { margin: var(--space-0-5) 0 0; color: var(--surface-muted); }
+.guide-step { padding: var(--space-2) 0; border-top: 1px solid var(--surface-divider); }
+.guide-step h3 { display: flex; align-items: center; gap: var(--space-1-5); margin: 0 0 var(--space-1); font-family: var(--font-display-cn); font-weight: 400; font-size: var(--text-xl); }
+.guide-step ol, .guide-step ul { margin: 0; padding-left: 1.4em; line-height: var(--leading-relaxed); font-size: 17px; }
+.guide-step li { margin: var(--space-0-5) 0; }
+.guide-step ul { margin-top: var(--space-0-5); }
+.guide-step ul li { list-style: none; margin-left: -1.2em; }
+.guide-step code, .guide-step kbd {
+  font-family: ui-monospace, Consolas, monospace; font-size: .85em;
+  padding: 1px 6px; border-radius: 6px; background: var(--neutral-200); border: 1px solid var(--surface-divider);
+}
+.guide-step kbd { box-shadow: 0 1px 0 var(--neutral-400); }
+.faq { margin: 0; font-size: 17px; line-height: var(--leading-relaxed); }
+.faq dt { font-weight: 700; margin-top: var(--space-1-5); }
+.faq dd { margin: 2px 0 0; color: var(--neutral-700); }
+.guide-actions { text-align: center; margin-top: var(--space-3); }
+
 /* ---------- confirm dialog ---------- */
 .confirm-modal { z-index: calc(var(--z-modal) + 5); }
 .confirm-card {
