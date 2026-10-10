@@ -316,16 +316,19 @@ input:focus, textarea:focus { outline: none; border-color: var(--gold-500); box-
 .face.back.boy { background: var(--boy-grad); }
 .face.back.girl { background: var(--girl-grad); }
 .face.back::after { content: ''; position: absolute; inset: 7%; border: 1px solid rgba(255, 255, 255, .6); border-radius: 10px; }
-/* the heart sits dead centre so the winning line runs through it, not the text */
-.face.back .heart-icon {
-  grid-row: 2; display: block;
-  width: calc(var(--size) * .085); height: calc(var(--size) * .085);
-  fill: rgba(255, 255, 255, .95);
-  filter: drop-shadow(0 2px 4px rgba(46, 35, 29, .18));
+/*
+ * Heart dead centre so the winning line runs through it. Heart and labels are
+ * sized so everything stays inside the white inner frame (inset 7%).
+ */
+.face.back .emoji { grid-row: 2; font-size: calc(var(--size) * .064); line-height: 1; text-shadow: none; }
+.face.back .text {
+  grid-row: 3; align-self: start;
+  display: flex; flex-direction: column; align-items: center; gap: calc(var(--size) * .004);
+  padding-top: calc(var(--size) * .006);
+  line-height: 1;
 }
-.face.back .text { grid-row: 3; align-self: start; display: flex; flex-direction: column; align-items: center; line-height: 1.15; padding-top: calc(var(--size) * .006); }
-.face.back .label { font-family: var(--font-caps); font-size: calc(var(--size) * .05); font-weight: 700; letter-spacing: var(--tracking-wider); padding-left: var(--tracking-wider); }
-.face.back .label-cn { font-family: var(--font-brush-cn); font-size: calc(var(--size) * .035); }
+.face.back .label { font-family: var(--font-caps); font-size: calc(var(--size) * .037); font-weight: 700; letter-spacing: var(--tracking-wider); padding-left: var(--tracking-wider); }
+.face.back .label-cn { font-family: var(--font-brush-cn); font-size: calc(var(--size) * .028); }
 
 /* golden centre */
 .cell.golden .face.front {
@@ -447,6 +450,57 @@ body.suspense .stage-head, body.suspense .stage-foot, body.suspense .cell:not(.g
 .q-feedback { min-height: 1.5em; margin: var(--space-2) 0 var(--space-0-5); font-family: var(--font-display-cn); font-size: clamp(20px, 3.2vh, 30px); }
 .q-feedback.ok { color: var(--success-dark); }
 .q-feedback.bad { color: var(--error); }
+
+/* ---------- user guide ---------- */
+.guide-btn { margin-top: var(--space-1); }
+.guide-modal { align-items: start; overflow-y: auto; }
+.guide-card {
+  width: min(760px, 100%);
+  margin: var(--space-3) auto;
+  padding: var(--space-6) clamp(var(--space-3), 5vw, var(--space-6)) var(--space-4);
+  text-align: left;
+  animation: popIn var(--duration-slow) var(--ease-flip);
+}
+.guide-close {
+  position: absolute; top: var(--space-2); right: var(--space-2); z-index: 1;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--surface-divider); background: var(--surface-card);
+  font-size: var(--text-xl); line-height: 1; color: var(--surface-muted);
+}
+.guide-head { text-align: center; margin-bottom: var(--space-3); }
+.guide-head h2 { margin: 0; font-family: var(--font-display-cn); font-weight: 400; font-size: var(--text-3xl); color: var(--gold-700); }
+.guide-head p { margin: var(--space-0-5) 0 0; color: var(--surface-muted); }
+.guide-step { padding: var(--space-2) 0; border-top: 1px solid var(--surface-divider); }
+.guide-step h3 { display: flex; align-items: center; gap: var(--space-1-5); margin: 0 0 var(--space-1); font-family: var(--font-display-cn); font-weight: 400; font-size: var(--text-xl); }
+.guide-step ol, .guide-step ul { margin: 0; padding-left: 1.4em; line-height: var(--leading-relaxed); font-size: 17px; }
+.guide-step li { margin: var(--space-0-5) 0; }
+.guide-step ul { margin-top: var(--space-0-5); }
+.guide-step ul li { list-style: none; margin-left: -1.2em; }
+.guide-step code, .guide-step kbd {
+  font-family: ui-monospace, Consolas, monospace; font-size: .85em;
+  padding: 1px 6px; border-radius: 6px; background: var(--neutral-200); border: 1px solid var(--surface-divider);
+}
+.guide-step kbd { box-shadow: 0 1px 0 var(--neutral-400); }
+.faq { margin: 0; font-size: 17px; line-height: var(--leading-relaxed); }
+.faq dt { font-weight: 700; margin-top: var(--space-1-5); }
+.faq dd { margin: 2px 0 0; color: var(--neutral-700); }
+.guide-actions { text-align: center; margin-top: var(--space-3); }
+
+/* ---------- confirm dialog ---------- */
+.confirm-modal { z-index: calc(var(--z-modal) + 5); }
+.confirm-card {
+  width: min(460px, 100%);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  text-align: center;
+  animation: popIn var(--duration-slow) var(--ease-flip);
+}
+.confirm-title { margin: 0 0 var(--space-1); font-family: var(--font-display-cn); font-weight: 400; font-size: var(--text-2xl); }
+.confirm-text { margin: 0 0 var(--space-3); color: var(--neutral-700); line-height: var(--leading-relaxed); }
+.confirm-actions { display: flex; justify-content: center; gap: var(--space-1-5); flex-wrap: wrap; }
+.btn.primary.danger { background: linear-gradient(135deg, var(--error), var(--error-dark)); box-shadow: 0 8px 22px rgba(168, 86, 106, .3); }
+
+.reset-row { margin-top: var(--space-3); padding-top: var(--space-2); border-top: 1px dashed var(--surface-divider); text-align: center; }
+.link.danger-link { color: var(--error-dark); text-decoration-color: #e4b3be; font-size: var(--text-sm); }
 
 /* ---------- countdown & result ---------- */
 .countdown { position: fixed; inset: 0; z-index: var(--z-popover); display: grid; place-items: center; pointer-events: none; }

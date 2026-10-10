@@ -225,7 +225,15 @@
     });
 
     $('pwForgot').addEventListener('click', function () {
-      if (!confirm('忘记密码只能重新选择宝宝性别，并重新设置密码。\n当前的选择和翻牌进度会被清除，确定吗？')) return;
+      askConfirm({
+        title: '忘记密码？',
+        text: '密码无法找回，只能清除当前的性别选择，重新设置密码再选。翻牌进度也会一起清除。',
+        ok: '清除并重新选择',
+        danger: true
+      }).then(function (yes) { if (yes) forgetGender(); });
+    });
+
+    function forgetGender() {
       state.secret = '';
       state.lock = null;
       state.game = null;
@@ -233,15 +241,20 @@
       $('resumeBtn').hidden = true;
       renderGenderPick();
       genderMsg('已清除，请重新设置密码并选择', true);
-    });
+      $('pwNew').focus();
+    }
 
     // C. unlocked: switch, change password, relock
     $('genderSwitch').addEventListener('click', function () {
       var next = this.dataset.gender;
-      if (state.game && !confirm('修改性别会清空当前翻牌进度，确定吗？')) return;
-      setGender(next);
-      renderGenderPick();
-      genderMsg('已改成 ' + COPY[next].cn, true);
+      function apply() {
+        setGender(next);
+        renderGenderPick();
+        genderMsg('已改成 ' + COPY[next].cn, true);
+      }
+      if (!state.game) return apply();
+      askConfirm({ title: '改成' + COPY[next].cn + '？', text: '修改性别会清空当前的翻牌进度。', ok: '确定修改' })
+        .then(function (yes) { if (yes) apply(); });
     });
 
     $('pwChangeToggle').addEventListener('click', function () {
@@ -268,23 +281,47 @@
     });
 
     $('resetQuestions').addEventListener('click', function () {
-      if (!confirm('确定要用示例题目覆盖现在的题目吗？')) return;
-      state.questions = cloneQuestions(window.DEFAULT_QUESTIONS);
-      save();
-      renderQuestions();
+      askConfirm({ title: '恢复示例题目？', text: '现在填写的 9 道题会被示例题目覆盖。', ok: '恢复示例', danger: true })
+        .then(function (yes) {
+          if (!yes) return;
+          state.questions = cloneQuestions(window.DEFAULT_QUESTIONS);
+          save();
+          renderQuestions();
+        });
     });
 
     $('startBtn').addEventListener('click', function () {
       var err = validateSetup();
       $('setupError').textContent = err;
       if (err) return;
-      if (state.game && !state.game.finished && !confirm('开始新的一局会清空当前翻牌进度，确定吗？')) return;
-      state.game = { layout: Board.generateLayout(), revealed: [false, false, false, false, false, false, false, false, false], finished: false };
-      save();
-      showStage();
+      function start() {
+        state.game = { layout: Board.generateLayout(), revealed: [false, false, false, false, false, false, false, false, false], finished: false };
+        save();
+        showStage();
+      }
+      if (!(state.game && !state.game.finished)) return start();
+      askConfirm({ title: '开始新的一局？', text: '当前的翻牌进度会清空，棋盘会重新洗牌。想接着玩请点「继续当前进度」。', ok: '重新开始' })
+        .then(function (yes) { if (yes) start(); });
     });
 
     $('resumeBtn').addEventListener('click', showStage);
+
+    $('resetAll').addEventListener('click', function () {
+      askConfirm({
+        title: '全部重置？',
+        text: '名字、宝宝性别和密码、9 道题目、翻牌进度都会清除，回到一开始的样子（题目恢复成示例）。这个操作不能撤销。',
+        ok: '全部重置',
+        danger: true
+      }).then(function (yes) {
+        if (!yes) return;
+        try { localStorage.removeItem(STORE_KEY); } catch (e) { /* nothing stored */ }
+        state = defaultState();
+        genderUnlocked = false;
+        renderSetup();
+        scrollTo(0, 0);
+        toast('已全部重置，可以重新填写了');
+      });
+    });
   }
 
   // ---------- stage ----------
@@ -351,7 +388,7 @@
 
   function backFace(color) {
     var c = COPY[color];
-    return '<svg class="heart-icon" aria-hidden="true"><use href="#heart"/></svg><span class="text"><span class="label">' + c.label + '</span><span class="label-cn">' + c.cn + '</span></span>';
+    return '<span class="emoji" aria-hidden="true">' + c.emoji + '</span><span class="text"><span class="label">' + c.label + '</span><span class="label-cn">' + c.cn + '</span></span>';
   }
 
   function updateStatus() {
@@ -633,10 +670,56 @@
   $('fullscreenBtn').addEventListener('click', toggleFullscreen);
   $('settingsBtn').addEventListener('click', function () {
     if (busy) return;
-    if (confirm('返回设置页面？\n\n宝宝性别在设置页是用密码锁住的。翻牌进度会保留。')) showSetup();
+    askConfirm({ title: '返回设置页面？', text: '宝宝性别在设置页是用密码锁住的，翻牌进度会保留。', ok: '去设置' })
+      .then(function (yes) { if (yes) showSetup(); });
   });
 
+  // ---------- user guide ----------
+
+  var GUIDE_SEEN_KEY = 'wedding-gender-reveal:guide-seen';
+
+  function openGuide() {
+    $('guideModal').hidden = false;
+    $('guideModal').querySelector('.guide-card').scrollTop = 0;
+    $('guideDone').focus();
+  }
+  function closeGuide() {
+    $('guideModal').hidden = true;
+    try { localStorage.setItem(GUIDE_SEEN_KEY, '1'); } catch (e) { /* ignore */ }
+  }
+  $('guideBtn').addEventListener('click', openGuide);
+  $('guideBtnStage').addEventListener('click', openGuide);
+  $('guideClose').addEventListener('click', closeGuide);
+  $('guideDone').addEventListener('click', closeGuide);
+  $('guideModal').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeGuide(); });
+
+  // In-page replacement for window.confirm(): some embedded browsers (and
+  // screen-share tools) suppress native dialogs, which made buttons look dead.
+  var confirmResolve = null;
+  function askConfirm(opts) {
+    $('confirmTitle').textContent = opts.title;
+    $('confirmText').textContent = opts.text || '';
+    var ok = $('confirmOk');
+    ok.textContent = opts.ok || '确定';
+    ok.classList.toggle('danger', !!opts.danger);
+    if (confirmResolve) confirmResolve(false);
+    $('confirmModal').hidden = false;
+    $('confirmCancel').focus();
+    return new Promise(function (resolve) { confirmResolve = resolve; });
+  }
+  function settleConfirm(result) {
+    $('confirmModal').hidden = true;
+    var resolve = confirmResolve;
+    confirmResolve = null;
+    if (resolve) resolve(result);
+  }
+  $('confirmOk').addEventListener('click', function () { settleConfirm(true); });
+  $('confirmCancel').addEventListener('click', function () { settleConfirm(false); });
+  $('confirmModal').addEventListener('click', function (e) { if (e.target === e.currentTarget) settleConfirm(false); });
+
   document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !$('confirmModal').hidden) return settleConfirm(false);
+    if (e.key === 'Escape' && !$('guideModal').hidden) return closeGuide();
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.key === 'Escape' && !$('qModal').hidden && !$('qClose').hidden) closeModal();
     if ((e.key === 'f' || e.key === 'F') && !$('stage').hidden) toggleFullscreen();
@@ -663,4 +746,9 @@
   spawnPetals();
   if (state.game && decodeSecret(state.secret) && !validateSetup()) showStage();
   else showSetup();
+
+  // First visit on this computer: show the guide once.
+  var guideSeen = true;
+  try { guideSeen = !!localStorage.getItem(GUIDE_SEEN_KEY); } catch (e) { /* storage blocked: don't nag */ }
+  if (!guideSeen && $('stage').hidden) openGuide();
 })();
