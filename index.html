@@ -6,51 +6,39 @@
   <title>Gender Reveal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=Pinyon+Script&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Parisienne&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="petals" aria-hidden="true"></div>
-
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <linearGradient id="gold-grad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#f3e2b3"/>
-        <stop offset=".5" stop-color="#c6a15b"/>
-        <stop offset="1" stop-color="#9c7630"/>
-      </linearGradient>
-      <symbol id="rings" viewBox="0 0 120 70">
-        <circle cx="45" cy="42" r="22" fill="none" stroke="url(#gold-grad)" stroke-width="5"/>
-        <circle cx="75" cy="42" r="22" fill="none" stroke="url(#gold-grad)" stroke-width="5"/>
-        <path d="M45 20 l-6 -8 h12 z" fill="#fff" stroke="url(#gold-grad)" stroke-width="1.5"/>
-        <path d="M39 12 l6 -6 l6 6" fill="none" stroke="url(#gold-grad)" stroke-width="1.5"/>
+      <!-- envelope body: side and bottom folds meeting under the flap -->
+      <symbol id="env-body" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <rect width="100" height="100" style="fill: var(--cotton)"/>
+        <path d="M0 0 L50 57 L0 100 Z" style="fill: var(--cotton-fold)"/>
+        <path d="M100 0 L50 57 L100 100 Z" style="fill: var(--cotton-fold)"/>
+        <path d="M0 100 L50 52 L100 100 Z" style="fill: var(--cotton)"/>
+        <path d="M0 100 L50 52 L100 100" fill="none" stroke="rgba(90,70,40,.16)" stroke-width="1" vector-effect="non-scaling-stroke"/>
       </symbol>
-      <symbol id="flourish" viewBox="0 0 240 24">
-        <path d="M0 12 H90 M150 12 H240" stroke="url(#gold-grad)" stroke-width="1.2"/>
-        <path d="M120 3 C108 3 104 12 96 12 C104 12 108 21 120 21 C132 21 136 12 144 12 C136 12 132 3 120 3 Z" fill="none" stroke="url(#gold-grad)" stroke-width="1.2"/>
-        <circle cx="120" cy="12" r="3" fill="url(#gold-grad)"/>
+      <!-- flap: hinged on the top edge, opens towards the viewer -->
+      <symbol id="env-flap" viewBox="0 0 100 60" preserveAspectRatio="none">
+        <path d="M0 0 H100 L55 55 Q50 60 45 55 Z" style="fill: var(--cotton-shade)"/>
+        <path d="M0 0 L45 55 Q50 60 55 55 L100 0" fill="none" stroke="rgba(90,70,40,.22)" stroke-width="1" vector-effect="non-scaling-stroke"/>
       </symbol>
-      <!-- botanical corner: a gold line-art sprig arcing round the top-left corner -->
+      <!-- eucalyptus sprig for the stage corners -->
       <symbol id="sprig" viewBox="0 0 200 200">
         <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
           <path d="M8 120 C30 70 70 30 120 8" stroke-width="1.6"/>
-          <path d="M4 160 C20 90 90 20 160 4" stroke-width=".8" opacity=".55"/>
-          <path d="M48 59 c12 10 28 6 30 -6 c1 -6 -6 -8 -8 -3" stroke-width="1"/>
           <g stroke-width="1.2">
-            <g transform="translate(19 98) rotate(-12) scale(1.3)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/><path d="M2 0H21" stroke-width=".6"/></g>
-            <g transform="translate(32 78) rotate(-105) scale(1.2)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/><path d="M2 0H21" stroke-width=".6"/></g>
-            <g transform="translate(48 59) rotate(3) scale(1.3)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/><path d="M2 0H21" stroke-width=".6"/></g>
-            <g transform="translate(65 43) rotate(-90) scale(1.15)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/><path d="M2 0H21" stroke-width=".6"/></g>
-            <g transform="translate(84 28) rotate(17) scale(1.2)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/><path d="M2 0H21" stroke-width=".6"/></g>
-            <g transform="translate(105 15) rotate(-75) scale(1)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/><path d="M2 0H21" stroke-width=".6"/></g>
-            <g transform="translate(120 8) rotate(-20) scale(1.1)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/><path d="M2 0H21" stroke-width=".6"/></g>
-            <g transform="translate(8 120) rotate(118) scale(1.1)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/><path d="M2 0H21" stroke-width=".6"/></g>
+            <g transform="translate(19 98) rotate(-12) scale(1.3)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/></g>
+            <g transform="translate(32 78) rotate(-105) scale(1.2)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/></g>
+            <g transform="translate(48 59) rotate(3) scale(1.3)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/></g>
+            <g transform="translate(65 43) rotate(-90) scale(1.15)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/></g>
+            <g transform="translate(84 28) rotate(17) scale(1.2)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/></g>
+            <g transform="translate(105 15) rotate(-75) scale(1)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/></g>
+            <g transform="translate(120 8) rotate(-20) scale(1.1)"><path d="M0 0C6-7 18-7 24 0C18 7 6 7 0 0Z"/></g>
           </g>
-        </g>
-        <g fill="currentColor">
-          <circle cx="40" cy="97" r="2.2"/><circle cx="44" cy="102" r="1.6"/>
-          <circle cx="72" cy="63" r="2.6"/><circle cx="92" cy="47" r="2"/><circle cx="97" cy="52" r="1.4"/>
         </g>
       </symbol>
       <symbol id="heart" viewBox="0 0 24 24">
@@ -65,32 +53,28 @@
 
   <!-- ========== Setup (do this before sharing the screen) ========== -->
   <main id="setup" class="screen" hidden>
-    <div class="setup-card frame">
-      <svg class="sprig tl" aria-hidden="true"><use href="#sprig"/></svg>
-      <svg class="sprig tr" aria-hidden="true"><use href="#sprig"/></svg>
+    <div class="sheet">
       <header class="setup-head">
-        <svg class="rings"><use href="#rings"/></svg>
-        <p class="eyebrow">Setup · 设置</p>
-        <h1 class="script gold-text">Gender Reveal</h1>
-        <p class="hint">⚠️ 请在<strong>共享屏幕之前</strong>完成设置 · Set up before you share your screen</p>
-        <button type="button" id="guideBtn" class="btn ghost small guide-btn">📖 使用手册</button>
+        <h1>揭晓前的准备</h1>
+        <p class="hint">请在共享屏幕之前填好。来宾只会看到揭晓页。</p>
+        <button type="button" id="guideBtn" class="btn quiet small">使用手册</button>
       </header>
 
       <section class="step">
-        <h2><span class="step-no">1</span>新人名字 <small>Couple</small></h2>
+        <h2><span class="step-no">1</span>新人名字</h2>
         <div class="name-row">
-          <label>新郎 Groom<input id="groom" maxlength="20" placeholder="例如：Jason"></label>
-          <span class="amp script">&amp;</span>
-          <label>新娘 Bride<input id="bride" maxlength="20" placeholder="例如：Emily"></label>
+          <label class="field"><span class="field-label">新郎</span><input id="groom" maxlength="20" placeholder="例如：Jason"></label>
+          <span class="amp" aria-hidden="true">&amp;</span>
+          <label class="field"><span class="field-label">新娘</span><input id="bride" maxlength="20" placeholder="例如：Emily"></label>
         </div>
-        <p class="preview">标题预览：<span id="titlePreview" class="script"></span></p>
+        <p class="preview"><span class="preview-label">揭晓页标题</span><span id="titlePreview" class="preview-title"></span></p>
       </section>
 
       <section class="step">
-        <h2><span class="step-no">2</span>宝宝性别 <small>Baby's gender</small></h2>
+        <h2><span class="step-no">2</span>宝宝性别</h2>
         <!-- A. first time: bride sets a password, then picks -->
         <div id="genderSetup" class="gender-panel">
-          <p class="hint">由<b>新娘</b>先设置一个密码，再选择宝宝性别。选好后会锁住，之后要查看或修改都需要输入密码。</p>
+          <p class="hint">由新娘先设一个密码，再选宝宝性别。选好后会锁住，之后要查看或修改都需要输入密码。</p>
           <div class="pw-row">
             <label class="field"><span class="field-label">设置密码 <em>至少 4 位</em></span>
               <input id="pwNew" type="password" autocomplete="new-password" maxlength="40"></label>
@@ -98,16 +82,16 @@
               <input id="pwNew2" type="password" autocomplete="new-password" maxlength="40"></label>
           </div>
           <div class="gender-pick">
-            <button type="button" class="gender-btn boy" data-gender="boy">💙<span>男宝宝 · Boy</span></button>
-            <button type="button" class="gender-btn girl" data-gender="girl">💗<span>女宝宝 · Girl</span></button>
+            <button type="button" class="gender-btn boy" data-gender="boy"><span class="gender-script">Boy</span>男宝宝</button>
+            <button type="button" class="gender-btn girl" data-gender="girl"><span class="gender-script">Girl</span>女宝宝</button>
           </div>
         </div>
 
         <!-- B. locked -->
         <form id="genderLocked" class="gender-panel gender-locked" hidden>
-          <p class="locked-title"><svg class="icon"><use href="#lock"/></svg>已选择 · 已用密码锁住</p>
+          <p class="locked-title"><svg class="icon"><use href="#lock"/></svg>已选好，并用密码锁住了</p>
           <div class="pw-unlock">
-            <input id="pwUnlock" type="password" autocomplete="current-password" maxlength="40" placeholder="输入密码查看 / 修改" aria-label="密码">
+            <input id="pwUnlock" type="password" autocomplete="current-password" maxlength="40" placeholder="输入密码查看或修改" aria-label="密码">
             <button type="submit" class="btn primary small">解锁</button>
           </div>
           <button type="button" id="pwForgot" class="link">忘记密码？</button>
@@ -115,11 +99,11 @@
 
         <!-- C. unlocked -->
         <div id="genderUnlocked" class="gender-panel gender-unlocked" hidden>
-          <p class="current">当前选择：<b id="genderCurrent"></b></p>
+          <p class="current">现在选的是 <b id="genderCurrent"></b></p>
           <div class="unlocked-actions">
-            <button type="button" id="genderSwitch" class="btn ghost small"></button>
-            <button type="button" id="pwChangeToggle" class="btn ghost small">修改密码</button>
-            <button type="button" id="genderRelock" class="btn primary small">🔒 锁上</button>
+            <button type="button" id="genderSwitch" class="btn quiet small"></button>
+            <button type="button" id="pwChangeToggle" class="btn quiet small">修改密码</button>
+            <button type="button" id="genderRelock" class="btn primary small">锁上</button>
           </div>
           <form id="pwChange" class="pw-row" hidden>
             <label class="field"><span class="field-label">新密码 <em>至少 4 位</em></span>
@@ -133,14 +117,14 @@
       </section>
 
       <section class="step">
-        <h2><span class="step-no">3</span>闯关问题 <small>Questions</small></h2>
+        <h2><span class="step-no">3</span>闯关问题</h2>
         <p class="hint">
-          第 1–8 题按翻牌顺序出现，第 9 题用来解锁中间的<b class="gold-text">金色格子</b>。
-          填了错误选项就是<b>选择题</b>（选项会随机排列）；错误选项全部留空就是<b>开放题</b>，由主持人判断对错。
+          第 1–8 题按拆信的先后顺序出现，第 9 题用来拆中间的金色火漆。
+          填了错误选项就是选择题，选项会随机排列；错误选项全部留空就是开放题，由主持人判断对错。
         </p>
         <div class="legend-chips">
-          <span class="chip correct"><i class="mark">✓</i>绿色实线框 = 正确答案（必填）</span>
-          <span class="chip wrong"><i class="mark">✗</i>粉色虚线框 = 错误选项（可选）</span>
+          <span class="chip correct"><i class="mark">✓</i>绿色实线框：正确答案，必填</span>
+          <span class="chip wrong"><i class="mark">✗</i>粉色虚线框：错误选项，可选</span>
         </div>
         <ol id="questionList" class="question-list"></ol>
         <button type="button" id="resetQuestions" class="link">恢复示例题目</button>
@@ -148,8 +132,8 @@
 
       <p id="setupError" class="error" role="alert"></p>
       <div class="setup-actions">
-        <button type="button" id="resumeBtn" class="btn ghost" hidden>继续当前进度</button>
-        <button type="button" id="startBtn" class="btn primary">开始揭晓 ✨</button>
+        <button type="button" id="resumeBtn" class="btn quiet" hidden>继续当前进度</button>
+        <button type="button" id="startBtn" class="btn primary">开始揭晓</button>
       </div>
       <div class="reset-row">
         <button type="button" id="resetAll" class="link danger-link">全部重置，重新填写</button>
@@ -160,26 +144,22 @@
   <!-- ========== Stage (what guests see) ========== -->
   <main id="stage" class="screen" hidden>
     <svg class="sprig tl" aria-hidden="true"><use href="#sprig"/></svg>
-    <svg class="sprig tr" aria-hidden="true"><use href="#sprig"/></svg>
-    <svg class="sprig bl" aria-hidden="true"><use href="#sprig"/></svg>
     <svg class="sprig br" aria-hidden="true"><use href="#sprig"/></svg>
     <header class="stage-head">
-      <svg class="rings"><use href="#rings"/></svg>
-      <h1 class="couple script"><span id="nameA" class="names"></span> <span class="amp">&amp;</span> <span id="nameB" class="names"></span></h1>
+      <h1 class="couple"><span id="nameA"></span><span class="amp">&amp;</span><span id="nameB"></span></h1>
       <p class="subtitle">Gender Reveal</p>
-      <svg class="flourish"><use href="#flourish"/></svg>
-      <p id="tagline" class="tagline">Boy or Girl? 答对问题，翻开格子</p>
+      <p id="tagline" class="tagline"></p>
     </header>
 
     <div class="board-wrap">
-      <div id="board" class="board" role="grid" aria-label="Gender reveal board"></div>
+      <div id="board" class="board" role="grid" aria-label="揭晓棋盘"></div>
       <svg id="lineLayer" class="line-layer" aria-hidden="true"></svg>
     </div>
 
     <footer class="stage-foot">
-      <span class="legend"><i class="dot boy"></i>Boy 男宝宝</span>
+      <span class="legend"><i class="dot boy"></i>男宝宝</span>
       <span id="progress" class="progress"></span>
-      <span class="legend"><i class="dot girl"></i>Girl 女宝宝</span>
+      <span class="legend"><i class="dot girl"></i>女宝宝</span>
     </footer>
 
     <div class="corner-controls">
@@ -191,7 +171,7 @@
 
   <!-- Question dialog -->
   <div id="qModal" class="modal" hidden>
-    <div class="modal-card frame" role="dialog" aria-modal="true" aria-labelledby="qText">
+    <div class="modal-card notecard" role="dialog" aria-modal="true" aria-labelledby="qText">
       <p id="qBadge" class="q-badge"></p>
       <h2 id="qText" class="q-text"></h2>
       <div id="qOptions" class="q-options"></div>
@@ -202,7 +182,7 @@
 
   <!-- User guide -->
   <div id="guideModal" class="modal guide-modal" hidden>
-    <article class="guide-card frame" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <article class="guide-card notecard" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
       <button type="button" id="guideClose" class="guide-close" aria-label="关闭使用手册">×</button>
       <header class="guide-head">
         <h2 id="guideTitle">使用手册</h2>
@@ -212,14 +192,14 @@
       <section class="guide-step">
         <h3><span class="step-no">1</span>婚礼前：填好设置</h3>
         <ol>
-          <li>用 <b>Chrome 或 Edge</b> 打开 <code>index.html</code>。最好就在<b>婚礼当天要投屏的那台电脑</b>上设置，因为所有内容只存在这台电脑的浏览器里。</li>
-          <li><b>新人名字</b>：填新郎和新娘的名字，标题会变成「新郎 &amp; 新娘 Gender Reveal」。</li>
+          <li>用 Chrome 或 Edge 打开 <code>index.html</code>。最好就在<b>婚礼当天要投屏的那台电脑</b>上设置，因为所有内容只存在这台电脑的浏览器里。</li>
+          <li><b>新人名字</b>：填新郎和新娘的名字，揭晓页标题会变成「新郎 &amp; 新娘 Gender Reveal」，金色火漆上也会印上两人名字的首字。</li>
           <li><b>宝宝性别</b>：由新娘先设一个密码（至少 4 位，输入两次），再点选男宝宝或女宝宝。选完就锁住，之后要看或修改都需要输入这个密码。想连新人都保密的话，可以把这一步交给医生或好友。</li>
           <li><b>闯关问题</b>：把 9 道示例题改成你们自己的故事。
             <ul>
-              <li><span class="chip correct"><i class="mark">✓</i>绿色框</span> 填正确答案（必填）</li>
+              <li><span class="chip correct"><i class="mark">✓</i>绿色框</span> 填正确答案，必填</li>
               <li><span class="chip wrong"><i class="mark">✗</i>粉色框</span> 填错误选项：填了就是选择题；全部留空就是开放题，由主持人判断对错</li>
-              <li>第 1–8 题按翻牌的先后顺序出现，和点哪个格子无关；第 9 题专门用来开中间的金色格子</li>
+              <li>第 1–8 题按拆信的先后顺序出现，和点哪封信无关；第 9 题专门用来拆中间的金色火漆</li>
             </ul>
           </li>
         </ol>
@@ -228,21 +208,21 @@
       <section class="guide-step">
         <h3><span class="step-no">2</span>当天：开始投屏</h3>
         <ol>
-          <li>还没共享屏幕时，先点设置页底部的<b>「开始揭晓 ✨」</b>。</li>
+          <li>还没共享屏幕时，先点设置页底部的「开始揭晓」。</li>
           <li>按键盘 <kbd>F</kbd>（或右下角 ⛶）进入全屏。</li>
-          <li>再用 Zoom / Teams / Google Meet 共享屏幕，或者直接接上投影仪。</li>
+          <li>再用 Zoom、Teams 或 Google Meet 共享屏幕，或者直接接上投影仪。</li>
         </ol>
       </section>
 
       <section class="guide-step">
         <h3><span class="step-no">3</span>揭晓流程（主持人操作）</h3>
         <ol>
-          <li>请来宾选一个格子，点下去就会出现问题。中间的金色格子要等外围 8 格全部翻开才能点。</li>
-          <li><b>选择题</b>：来宾喊出答案后，点对应的选项。选错的会被划掉，可以继续猜；选对了格子就会翻开。</li>
-          <li><b>开放题</b>：先让来宾回答，再点「揭晓答案」，然后选「答对了 ✓ 翻开格子」或「没答对」。</li>
-          <li>答不出来可以点「稍后再答」，先换一个格子。</li>
-          <li>外围固定是 4 蓝 4 粉，而且怎么排都不会提前连成一条线，所以翻完 8 格也猜不到答案。</li>
-          <li>最后答对第 9 题：3、2、1 倒数，金色格子翻开，连成一条线，彩带落下，揭晓宝宝性别。点「查看棋盘」可以回到棋盘。</li>
+          <li>请来宾选一封信，点下去就会出现问题。中间的金色火漆要等外围 8 封信全部拆开才能拆。</li>
+          <li><b>选择题</b>：来宾喊出答案后，点对应的选项。选错的会被划掉，可以继续猜；选对了信封就会打开，滑出一张蓝色或粉色的卡片。</li>
+          <li><b>开放题</b>：先让来宾回答，再点「揭晓答案」，然后选「答对了，拆开信封」或「没答对」。</li>
+          <li>答不出来可以点「稍后再答」，先换一封信。</li>
+          <li>外围固定是 4 蓝 4 粉，而且怎么排都不会提前连成一条线，所以拆完 8 封也猜不到答案。</li>
+          <li>最后答对第 9 题：3、2、1 倒数，火漆裂开，连成一条线，彩带落下，揭晓宝宝性别。点「查看棋盘」可以回到棋盘。</li>
         </ol>
       </section>
 
@@ -260,7 +240,7 @@
           <dt>想全部重来？</dt>
           <dd>设置页最底部的「全部重置，重新填写」会清除名字、性别、密码、题目和进度。</dd>
           <dt>字体看起来不一样？</dt>
-          <dd>漂亮的字体来自 Google Fonts，需要联网。没有网络时会换成电脑自带的字体，功能完全一样。</dd>
+          <dd>字体来自 Google Fonts，需要联网。没有网络时会换成电脑自带的字体，功能完全一样。</dd>
         </dl>
       </section>
 
@@ -272,28 +252,26 @@
 
   <!-- In-page confirm (native confirm() is blocked in some browsers) -->
   <div id="confirmModal" class="modal confirm-modal" hidden>
-    <div class="confirm-card frame" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <div class="confirm-card notecard" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
       <h2 id="confirmTitle" class="confirm-title"></h2>
       <p id="confirmText" class="confirm-text"></p>
       <div class="confirm-actions">
-        <button type="button" id="confirmCancel" class="btn ghost small">取消</button>
+        <button type="button" id="confirmCancel" class="btn quiet small">取消</button>
         <button type="button" id="confirmOk" class="btn primary small"></button>
       </div>
     </div>
   </div>
 
-  <!-- Countdown before the golden slot flips -->
+  <!-- Countdown before the golden seal breaks -->
   <div id="countdown" class="countdown" hidden><span></span></div>
 
   <!-- Final result -->
   <div id="result" class="result" hidden>
     <div class="result-card">
-      <p class="result-pre">Congratulations</p>
-      <h2 id="resultTitle" class="result-title script"></h2>
+      <h2 id="resultTitle" class="result-title"></h2>
       <p id="resultSub" class="result-sub"></p>
-      <svg class="flourish"><use href="#flourish"/></svg>
-      <p id="resultNames" class="result-names script"></p>
-      <button type="button" id="resultClose" class="link">查看棋盘</button>
+      <p id="resultNames" class="result-names"></p>
+      <button type="button" id="resultClose" class="link on-dark">查看棋盘</button>
     </div>
   </div>
 

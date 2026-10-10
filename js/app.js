@@ -7,8 +7,8 @@
   var CENTER = Board.CENTER;
   var LETTERS = 'ABCD';
   var COPY = {
-    boy: { title: "It's a Boy!", sub: '是男宝宝！💙', label: 'BOY', cn: '男宝宝', emoji: '💙', confetti: ['#a9c8ea', '#5e8fc7', '#d8e8f8', '#f3e2b3', '#c6a15b', '#ffffff'] },
-    girl: { title: "It's a Girl!", sub: '是女宝宝！💗', label: 'GIRL', cn: '女宝宝', emoji: '💗', confetti: ['#f5bccb', '#df7f9b', '#fde3ea', '#f3e2b3', '#c6a15b', '#ffffff'] }
+    boy: { title: "It's a Boy!", sub: '是男宝宝！', label: 'Boy', cn: '男宝宝', emoji: '💙', confetti: ['#8fb5e6', '#4f80c0', '#d7e6f8', '#d4b47a', '#f4eee2'] },
+    girl: { title: "It's a Girl!", sub: '是女宝宝！', label: 'Girl', cn: '女宝宝', emoji: '💗', confetti: ['#f0a3b8', '#d06a89', '#fbe0e8', '#d4b47a', '#f4eee2'] }
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -129,8 +129,8 @@
       var li = document.createElement('li');
       li.className = 'q-item' + (golden ? ' golden' : '');
       li.innerHTML =
-        '<header><span>' + (golden ? '✦ 第 9 题 · 金色格子（最后揭晓）' : '第 ' + (i + 1) + ' 题') + '</span><span class="q-type"></span></header>' +
-        '<label class="field"><span class="field-label">问题 <em>Question</em></span><input data-field="q" placeholder="例如：我们是在哪里认识的？"></label>' +
+        '<header><span>' + (golden ? '第 9 题：拆金色火漆（最后揭晓）' : '第 ' + (i + 1) + ' 题') + '</span><span class="q-type"></span></header>' +
+        '<label class="field"><span class="field-label">问题</span><input data-field="q" placeholder="例如：我们是在哪里认识的？"></label>' +
         '<div class="answer-grid">' +
         '<label class="answer-box correct"><span class="field-label"><i class="mark">✓</i>正确答案 <em>必填</em></span>' +
         '<input data-field="answer" placeholder="填写正确答案"></label>' +
@@ -143,7 +143,7 @@
       var typeChip = li.querySelector('.q-type');
       function refresh() {
         var n = q.wrong.filter(function (w) { return w.trim(); }).length;
-        typeChip.textContent = n ? '选择题 · ' + (n + 1) + ' 个选项' : '开放题 · 主持人判断';
+        typeChip.textContent = n ? '选择题（' + (n + 1) + ' 个选项）' : '开放题（主持人判断）';
         typeChip.classList.toggle('open', !n);
         li.querySelector('[data-field="q"]').classList.toggle('missing', !q.q.trim());
         li.querySelector('[data-field="answer"]').classList.toggle('missing', !q.answer.trim());
@@ -227,7 +227,7 @@
     $('pwForgot').addEventListener('click', function () {
       askConfirm({
         title: '忘记密码？',
-        text: '密码无法找回，只能清除当前的性别选择，重新设置密码再选。翻牌进度也会一起清除。',
+        text: '密码无法找回，只能清除当前的性别选择，重新设置密码再选。拆信进度也会一起清除。',
         ok: '清除并重新选择',
         danger: true
       }).then(function (yes) { if (yes) forgetGender(); });
@@ -253,7 +253,7 @@
         genderMsg('已改成 ' + COPY[next].cn, true);
       }
       if (!state.game) return apply();
-      askConfirm({ title: '改成' + COPY[next].cn + '？', text: '修改性别会清空当前的翻牌进度。', ok: '确定修改' })
+      askConfirm({ title: '改成' + COPY[next].cn + '？', text: '修改性别会清空当前的拆信进度。', ok: '确定修改' })
         .then(function (yes) { if (yes) apply(); });
     });
 
@@ -300,7 +300,7 @@
         showStage();
       }
       if (!(state.game && !state.game.finished)) return start();
-      askConfirm({ title: '开始新的一局？', text: '当前的翻牌进度会清空，棋盘会重新洗牌。想接着玩请点「继续当前进度」。', ok: '重新开始' })
+      askConfirm({ title: '开始新的一局？', text: '当前的拆信进度会清空，棋盘会重新洗牌。想接着玩请点「继续当前进度」。', ok: '重新开始' })
         .then(function (yes) { if (yes) start(); });
     });
 
@@ -309,7 +309,7 @@
     $('resetAll').addEventListener('click', function () {
       askConfirm({
         title: '全部重置？',
-        text: '名字、宝宝性别和密码、9 道题目、翻牌进度都会清除，回到一开始的样子（题目恢复成示例）。这个操作不能撤销。',
+        text: '名字、宝宝性别和密码、9 道题目、拆信进度都会清除，回到一开始的样子（题目恢复成示例）。这个操作不能撤销。',
         ok: '全部重置',
         danger: true
       }).then(function (yes) {
@@ -355,6 +355,28 @@
     scrollTo(0, 0);
   }
 
+  function initial(name) {
+    var ch = Array.from(name.trim())[0] || '';
+    return ch.toUpperCase();
+  }
+
+  var ENVELOPE =
+    '<svg class="env-body" aria-hidden="true"><use href="#env-body"/></svg>' +
+    '<svg class="env-flap" aria-hidden="true"><use href="#env-flap"/></svg>';
+
+  function sealMarkup() {
+    var mono = escapeHtml(initial(state.names.groom) + '&' + initial(state.names.bride));
+    var half = '<span class="monogram">' + mono + '</span>';
+    return '<div class="seal" aria-hidden="true">' +
+      '<div class="seal-half l">' + half + '</div>' +
+      '<div class="seal-half r">' + half + '</div>' +
+      '<svg class="lock"><use href="#lock"/></svg></div>';
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; });
+  }
+
   function buildBoard() {
     var board = $('board');
     var gender = decodeSecret(state.secret);
@@ -372,9 +394,9 @@
       cell.setAttribute('role', 'gridcell');
       cell.innerHTML =
         '<div class="card">' +
-        (golden
-          ? '<div class="face front"><span class="shine"></span><span class="star">✦</span><span class="golden-label">Golden</span><svg class="lock"><use href="#lock"/></svg></div>'
-          : '<div class="face front"><span class="q">?</span><span class="heart">♥</span></div>') +
+        '<div class="face front envelope">' + ENVELOPE +
+        (golden ? sealMarkup() : '<span class="env-dot" aria-hidden="true"><svg><use href="#heart"/></svg></span>') +
+        '</div>' +
         // The golden face is filled in only at reveal time, so the answer is not in the DOM before then.
         '<div class="face back' + (golden && !state.game.revealed[i] ? '' : ' ' + color) + '">' +
         (golden && !state.game.revealed[i] ? '' : backFace(color)) +
@@ -397,23 +419,23 @@
     var allOuter = n === Board.OUTER.length;
     golden.classList.toggle('locked', !allOuter);
     golden.classList.toggle('ready', allOuter && !state.game.revealed[CENTER]);
-    golden.setAttribute('aria-label', allOuter ? '金色格子' : '金色格子（未解锁）');
+    golden.setAttribute('aria-label', allOuter ? '金色火漆' : '金色火漆（还不能拆）');
     cells.forEach(function (c, i) {
-      if (i !== CENTER) c.setAttribute('aria-label', state.game.revealed[i] ? COPY[state.game.layout[i]].cn : '未翻开的格子');
+      if (i !== CENTER) c.setAttribute('aria-label', state.game.revealed[i] ? COPY[state.game.layout[i]].cn : '还没拆的信封');
     });
 
     var tagline = $('tagline');
     var progress = $('progress');
     if (state.game.finished) {
       var g = decodeSecret(state.secret);
-      tagline.textContent = COPY[g].title + ' ' + COPY[g].sub;
-      progress.textContent = '🎉 揭晓完成';
+      tagline.textContent = COPY[g].sub;
+      progress.textContent = '揭晓完成';
     } else if (allOuter) {
-      tagline.textContent = '最后的答案，就藏在金色格子里……';
-      progress.textContent = '✦ 金色格子已解锁';
+      tagline.textContent = '答案就封在金色火漆里';
+      progress.textContent = '可以拆火漆了';
     } else {
-      tagline.textContent = 'Boy or Girl? 答对问题，翻开格子';
-      progress.textContent = '已翻开 ' + n + ' / 8';
+      tagline.textContent = '答对问题，就能拆开一封信';
+      progress.textContent = '已拆开 ' + n + ' / 8 封';
     }
   }
 
@@ -424,7 +446,7 @@
     if (state.game.revealed[i]) return;
     if (i === CENTER && outerRevealedCount() < Board.OUTER.length) {
       shake(cell);
-      toast('先翻开外围的 8 个格子，金色格子留到最后 ✦');
+      toast('先拆完外围的 8 封信，火漆留到最后');
       return;
     }
     var qIndex = i === CENTER ? GOLDEN_Q : outerRevealedCount();
@@ -445,7 +467,7 @@
     cells[i].classList.add('revealed');
     updateStatus();
     if (outerRevealedCount() === Board.OUTER.length) {
-      setTimeout(function () { toast('外围全部翻开！是男是女，还看金色格子 ✦'); }, 900);
+      setTimeout(function () { toast('8 封信都拆开了，是男是女就看火漆了'); }, 1300);
     }
   }
 
@@ -468,13 +490,13 @@
         save();
         drawLine(true);
         updateStatus();
-      }, 1000);
+      }, 1700);
 
       setTimeout(function () {
         Confetti.celebrate(COPY[gender].confetti, 1);
         showResult(gender);
         busy = false;
-      }, 2200);
+      }, 3000);
     });
   }
 
@@ -563,7 +585,7 @@
     var golden = qIndex === GOLDEN_Q;
     var card = document.querySelector('#qModal .modal-card');
     card.classList.toggle('golden', golden);
-    $('qBadge').textContent = golden ? '✦ Golden Question · 最后一题' : 'Question ' + (qIndex + 1) + ' · 第 ' + (qIndex + 1) + ' 题';
+    $('qBadge').textContent = golden ? '最后一题：拆开金色火漆' : '第 ' + (qIndex + 1) + ' 题';
     $('qText').textContent = q.q;
     var feedback = $('qFeedback');
     feedback.textContent = '';
@@ -601,7 +623,7 @@
       box.className = 'q-open';
       var revealBtn = document.createElement('button');
       revealBtn.type = 'button';
-      revealBtn.className = 'btn ghost';
+      revealBtn.className = 'btn quiet';
       revealBtn.textContent = '揭晓答案';
       revealBtn.addEventListener('click', function () {
         box.innerHTML = '';
@@ -613,11 +635,11 @@
         var yes = document.createElement('button');
         yes.type = 'button';
         yes.className = 'btn primary';
-        yes.textContent = '答对了 ✓ 翻开格子';
+        yes.textContent = '答对了，拆开信封';
         yes.addEventListener('click', function () { yes.disabled = true; succeed(); });
         var no = document.createElement('button');
         no.type = 'button';
-        no.className = 'btn ghost';
+        no.className = 'btn quiet';
         no.textContent = '没答对 ✗';
         no.addEventListener('click', closeModal);
         actions.appendChild(yes);
@@ -629,7 +651,7 @@
     }
 
     function succeed() {
-      feedback.textContent = golden ? '答对了！准备揭晓…… ✨' : '答对了！🎉';
+      feedback.textContent = golden ? '答对了！准备拆火漆……' : '答对了！';
       feedback.className = 'q-feedback ok';
       $('qClose').hidden = true;
       setTimeout(function () {
@@ -670,7 +692,7 @@
   $('fullscreenBtn').addEventListener('click', toggleFullscreen);
   $('settingsBtn').addEventListener('click', function () {
     if (busy) return;
-    askConfirm({ title: '返回设置页面？', text: '宝宝性别在设置页是用密码锁住的，翻牌进度会保留。', ok: '去设置' })
+    askConfirm({ title: '返回设置页面？', text: '宝宝性别在设置页是用密码锁住的，拆信进度会保留。', ok: '去设置' })
       .then(function (yes) { if (yes) showSetup(); });
   });
 
@@ -725,25 +747,10 @@
     if ((e.key === 'f' || e.key === 'F') && !$('stage').hidden) toggleFullscreen();
   });
 
-  function spawnPetals() {
-    var box = document.querySelector('.petals');
-    for (var i = 0; i < 16; i++) {
-      var p = document.createElement('span');
-      p.className = 'petal' + (i % 3 === 0 ? ' alt' : '');
-      p.style.left = Math.random() * 100 + 'vw';
-      p.style.animationDuration = 12 + Math.random() * 14 + 's';
-      p.style.animationDelay = -Math.random() * 20 + 's';
-      var s = 0.6 + Math.random() * 0.8;
-      p.style.width = 14 * s + 'px';
-      p.style.height = 18 * s + 'px';
-      box.appendChild(p);
-    }
-  }
 
   // ---------- boot ----------
 
   bindSetup();
-  spawnPetals();
   if (state.game && decodeSecret(state.secret) && !validateSetup()) showStage();
   else showSetup();
 
