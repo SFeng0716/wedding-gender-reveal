@@ -150,6 +150,9 @@
         <button type="button" id="resumeBtn" class="btn ghost" hidden>继续当前进度</button>
         <button type="button" id="startBtn" class="btn primary">开始揭晓 ✨</button>
       </div>
+      <div class="reset-row">
+        <button type="button" id="resetAll" class="link danger-link">全部重置，重新填写</button>
+      </div>
     </div>
   </main>
 
@@ -192,6 +195,18 @@
       <div id="qOptions" class="q-options"></div>
       <p id="qFeedback" class="q-feedback" aria-live="polite"></p>
       <button type="button" id="qClose" class="link">稍后再答</button>
+    </div>
+  </div>
+
+  <!-- In-page confirm (native confirm() is blocked in some browsers) -->
+  <div id="confirmModal" class="modal confirm-modal" hidden>
+    <div class="confirm-card frame" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+      <h2 id="confirmTitle" class="confirm-title"></h2>
+      <p id="confirmText" class="confirm-text"></p>
+      <div class="confirm-actions">
+        <button type="button" id="confirmCancel" class="btn ghost small">取消</button>
+        <button type="button" id="confirmOk" class="btn primary small"></button>
+      </div>
     </div>
   </div>
 
