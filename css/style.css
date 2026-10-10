@@ -466,6 +466,22 @@ body.suspense .stage-head, body.suspense .stage-foot, body.suspense .cell:not(.g
 .q-feedback.ok { color: var(--success-dark); }
 .q-feedback.bad { color: var(--error); }
 
+/* ---------- confirm dialog ---------- */
+.confirm-modal { z-index: calc(var(--z-modal) + 5); }
+.confirm-card {
+  width: min(460px, 100%);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  text-align: center;
+  animation: popIn var(--duration-slow) var(--ease-flip);
+}
+.confirm-title { margin: 0 0 var(--space-1); font-family: var(--font-display-cn); font-weight: 400; font-size: var(--text-2xl); }
+.confirm-text { margin: 0 0 var(--space-3); color: var(--neutral-700); line-height: var(--leading-relaxed); }
+.confirm-actions { display: flex; justify-content: center; gap: var(--space-1-5); flex-wrap: wrap; }
+.btn.primary.danger { background: linear-gradient(135deg, var(--error), var(--error-dark)); box-shadow: 0 8px 22px rgba(168, 86, 106, .3); }
+
+.reset-row { margin-top: var(--space-3); padding-top: var(--space-2); border-top: 1px dashed var(--surface-divider); text-align: center; }
+.link.danger-link { color: var(--error-dark); text-decoration-color: #e4b3be; font-size: var(--text-sm); }
+
 /* ---------- countdown & result ---------- */
 .countdown { position: fixed; inset: 0; z-index: var(--z-popover); display: grid; place-items: center; pointer-events: none; }
 .countdown span {
