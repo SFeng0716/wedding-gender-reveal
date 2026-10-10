@@ -36,3 +36,14 @@ npm test
 ```
 
 所有改动都通过 Pull Request 合并。
+
+## 设计系统
+
+- `css/tokens.css`：设计 token（金 / 蓝 / 粉 / 暖中性 50–900 色阶、语义色、1.25 大三度字号、8pt 间距、圆角、阴影、动效、z-index），结构参考 `ui-design-system` skill
+- `css/style.css`：组件样式，只引用 token
+- 字体（Google Fonts）：
+  - **Pinyon Script**：名字、大标题
+  - **Cinzel**：英文大写标签、按钮
+  - **ZCOOL XiaoWei 站酷小薇**：中文标题、题目
+  - **Ma Shan Zheng 马善政**：揭晓大字
+  - **Cormorant Garamond / Noto Serif SC**：正文
