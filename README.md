@@ -20,7 +20,13 @@
 
 ## 使用
 
-不需要安装任何东西，直接用浏览器打开 `index.html` 即可（建议 Chrome / Edge）。
+### 👉 [打开 Gender Reveal](https://sfeng0716.github.io/wedding-gender-reveal/gender-reveal.html)
+
+网址：<https://sfeng0716.github.io/wedding-gender-reveal/gender-reveal.html>（建议用 Chrome / Edge）
+
+不需要安装任何东西。也可以把仓库下载到电脑上，直接双击 `gender-reveal.html` 打开，离线也能用（只是字体会换成电脑自带的）。
+
+> 名字、宝宝性别、题目和进度都只存在**当前这台电脑的浏览器里**，不会上传到网上。所以请在婚礼当天要投屏的那台电脑上设置。
 
 **完整的使用手册在页面里**：设置页顶部的「📖 使用手册」，或揭晓页右下角的「?」。第一次打开时会自动显示。
 
