@@ -19,6 +19,7 @@
     return {
       names: { groom: '', bride: '' },
       secret: '',
+      lock: null,
       questions: cloneQuestions(window.DEFAULT_QUESTIONS),
       game: null
     };
@@ -37,6 +38,11 @@
       var saved = JSON.parse(localStorage.getItem(STORE_KEY));
       if (saved && Array.isArray(saved.questions) && saved.questions.length === QUESTION_COUNT) {
         saved.questions = cloneQuestions(saved.questions);
+        // A gender saved before passwords existed has to be picked again behind one.
+        if (saved.secret && !(saved.lock && saved.lock.hash)) {
+          saved.secret = '';
+          saved.game = null;
+        }
         return saved;
       }
     } catch (e) { /* fall through to defaults */ }
@@ -74,12 +80,45 @@
     renderQuestions();
     $('resumeBtn').hidden = !(state.game && !state.game.finished && decodeSecret(state.secret));
     $('setupError').textContent = '';
+    genderMsg('');
   }
 
+  // Unlocking only lasts until the page is left or reloaded.
+  var genderUnlocked = false;
+
   function renderGenderPick() {
-    var chosen = !!decodeSecret(state.secret);
-    $('genderPick').hidden = chosen;
-    $('genderLocked').hidden = !chosen;
+    var gender = decodeSecret(state.secret);
+    var chosen = !!(gender && state.lock);
+    if (!chosen) genderUnlocked = false;
+    $('genderSetup').hidden = chosen;
+    $('genderLocked').hidden = !chosen || genderUnlocked;
+    $('genderUnlocked').hidden = !chosen || !genderUnlocked;
+    $('pwChange').hidden = true;
+    ['pwNew', 'pwNew2', 'pwUnlock', 'pwChange1', 'pwChange2'].forEach(function (id) { $(id).value = ''; });
+
+    var panel = $('genderUnlocked');
+    panel.classList.remove('boy', 'girl');
+    if (chosen && genderUnlocked) {
+      var other = gender === 'boy' ? 'girl' : 'boy';
+      panel.classList.add(gender);
+      $('genderCurrent').textContent = COPY[gender].emoji + ' ' + COPY[gender].cn;
+      $('genderSwitch').textContent = '改成 ' + COPY[other].emoji + ' ' + COPY[other].cn;
+      $('genderSwitch').dataset.gender = other;
+    }
+  }
+
+  function genderMsg(text, ok) {
+    var el = $('genderMsg');
+    el.textContent = text || '';
+    el.className = 'gender-msg' + (ok ? ' ok' : '');
+  }
+
+  function setGender(gender) {
+    state.secret = encodeSecret(gender);
+    // A different answer means the current round no longer makes sense.
+    state.game = null;
+    save();
+    $('resumeBtn').hidden = true;
   }
 
   function renderQuestions() {
@@ -128,7 +167,7 @@
 
   function validateSetup() {
     if (!state.names.groom.trim() || !state.names.bride.trim()) return '请填写新郎和新娘的名字';
-    if (!decodeSecret(state.secret)) return '请选择宝宝的性别';
+    if (!decodeSecret(state.secret) || !state.lock) return '请先设置密码并选择宝宝的性别';
     for (var i = 0; i < state.questions.length; i++) {
       var q = state.questions[i];
       if (!q.q.trim() || !q.answer.trim()) return '第 ' + (i + 1) + ' 题还没有填写问题或正确答案';
@@ -145,39 +184,87 @@
       });
     });
 
+    // A. first pick: password first, then gender.
     document.querySelectorAll('.gender-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        state.secret = encodeSecret(btn.dataset.gender);
-        // A different answer means the current round no longer makes sense.
-        state.game = null;
-        save();
-        renderGenderPick();
-        $('resumeBtn').hidden = true;
-        toast('已保存，并已隐藏 🔒');
+        var err = GenderLock.checkNewPassword($('pwNew').value, $('pwNew2').value);
+        if (err) {
+          genderMsg(err);
+          $(err.indexOf('不一致') !== -1 ? 'pwNew2' : 'pwNew').focus();
+          return;
+        }
+        GenderLock.create($('pwNew').value).then(function (lock) {
+          state.lock = lock;
+          setGender(btn.dataset.gender);
+          genderUnlocked = false;
+          renderGenderPick();
+          genderMsg('');
+          toast('已保存，并已用密码锁住 🔒');
+        }, function () { genderMsg('无法设置密码，请用 Chrome 或 Edge 打开'); });
       });
     });
 
-    var peek = $('genderPeek');
-    var locked = $('genderLocked');
-    function showPeek() {
-      var g = decodeSecret(state.secret);
-      if (!g) return;
-      locked.classList.add('peek', g);
-      peek.textContent = COPY[g].cn + ' ' + COPY[g].emoji;
-    }
-    function hidePeek() {
-      locked.classList.remove('peek', 'boy', 'girl');
-      peek.textContent = '按住查看';
-    }
-    peek.addEventListener('pointerdown', showPeek);
-    ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(function (ev) { peek.addEventListener(ev, hidePeek); });
+    // B. unlock
+    $('genderLocked').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var input = $('pwUnlock');
+      GenderLock.verify(state.lock, input.value).then(function (ok) {
+        if (!ok) {
+          genderMsg('密码不正确');
+          input.value = '';
+          input.classList.remove('shake-x');
+          void input.offsetWidth;
+          input.classList.add('shake-x');
+          input.focus();
+          return;
+        }
+        genderUnlocked = true;
+        genderMsg('');
+        renderGenderPick();
+      }, function () { genderMsg('此浏览器无法验证密码，请用 Chrome 或 Edge 打开'); });
+    });
 
-    $('genderReset').addEventListener('click', function () {
+    $('pwForgot').addEventListener('click', function () {
+      if (!confirm('忘记密码只能重新选择宝宝性别，并重新设置密码。\n当前的选择和翻牌进度会被清除，确定吗？')) return;
       state.secret = '';
+      state.lock = null;
       state.game = null;
       save();
-      renderGenderPick();
       $('resumeBtn').hidden = true;
+      renderGenderPick();
+      genderMsg('已清除，请重新设置密码并选择', true);
+    });
+
+    // C. unlocked: switch, change password, relock
+    $('genderSwitch').addEventListener('click', function () {
+      var next = this.dataset.gender;
+      if (state.game && !confirm('修改性别会清空当前翻牌进度，确定吗？')) return;
+      setGender(next);
+      renderGenderPick();
+      genderMsg('已改成 ' + COPY[next].cn, true);
+    });
+
+    $('pwChangeToggle').addEventListener('click', function () {
+      $('pwChange').hidden = !$('pwChange').hidden;
+      if (!$('pwChange').hidden) $('pwChange1').focus();
+    });
+
+    $('pwChange').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var err = GenderLock.checkNewPassword($('pwChange1').value, $('pwChange2').value);
+      if (err) return genderMsg(err);
+      GenderLock.create($('pwChange1').value).then(function (lock) {
+        state.lock = lock;
+        save();
+        renderGenderPick();
+        genderMsg('新密码已保存', true);
+      });
+    });
+
+    $('genderRelock').addEventListener('click', function () {
+      genderUnlocked = false;
+      renderGenderPick();
+      genderMsg('');
     });
 
     $('resetQuestions').addEventListener('click', function () {
@@ -226,6 +313,7 @@
     $('stage').hidden = true;
     $('setup').hidden = false;
     document.title = 'Gender Reveal · 设置';
+    genderUnlocked = false;
     renderSetup();
     scrollTo(0, 0);
   }
@@ -545,7 +633,7 @@
   $('fullscreenBtn').addEventListener('click', toggleFullscreen);
   $('settingsBtn').addEventListener('click', function () {
     if (busy) return;
-    if (confirm('返回设置页面？\n\n设置页可能会显示答案，请先确认来宾看不到屏幕。翻牌进度会保留。')) showSetup();
+    if (confirm('返回设置页面？\n\n宝宝性别在设置页是用密码锁住的。翻牌进度会保留。')) showSetup();
   });
 
   document.addEventListener('keydown', function (e) {
