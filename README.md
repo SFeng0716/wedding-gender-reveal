@@ -47,6 +47,5 @@ npm test
 - 字体（Google Fonts）：
   - **Pinyon Script**：名字、大标题
   - **Cinzel**：英文大写标签、按钮
-  - **ZCOOL XiaoWei 站酷小薇**：中文标题、题目
+  - **Noto Serif SC 思源宋体**（500 / 700 / 900）：中文标题、题目、正文，粗体保证投影清楚
   - **Ma Shan Zheng 马善政**：揭晓大字
-  - **Cormorant Garamond / Noto Serif SC**：正文

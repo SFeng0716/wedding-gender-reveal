@@ -69,7 +69,7 @@
   --surface-background: var(--neutral-100);
   --surface-card: var(--neutral-50);
   --surface-foreground: var(--neutral-800);
-  --surface-muted: var(--neutral-600);
+  --surface-muted: var(--neutral-700);
   --surface-divider: var(--neutral-300);
   --surface-overlay: rgba(46, 35, 29, .38);
 
@@ -81,10 +81,10 @@
 
   /* ---- typography ---- */
   --font-script: 'Pinyon Script', 'Ma Shan Zheng', cursive;
-  --font-caps: 'Cinzel', 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
-  --font-serif: 'Cormorant Garamond', 'Noto Serif SC', 'Songti SC', serif;
-  --font-display-cn: 'ZCOOL XiaoWei', 'Cormorant Garamond', 'Noto Serif SC', serif;
-  --font-brush-cn: 'Ma Shan Zheng', 'ZCOOL XiaoWei', cursive;
+  --font-caps: 'Cinzel', 'Noto Serif SC', serif;
+  --font-serif: 'Noto Serif SC', 'Songti SC', serif;
+  --font-display-cn: 'Noto Serif SC', 'Songti SC', serif;
+  --font-brush-cn: 'Ma Shan Zheng', 'Noto Serif SC', cursive;
 
   /* major third (1.25) from 16px */
   --text-xs: 10px;
