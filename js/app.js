@@ -1,0 +1,565 @@
+(function () {
+  'use strict';
+
+  var STORE_KEY = 'wedding-gender-reveal:v1';
+  var QUESTION_COUNT = 9;
+  var GOLDEN_Q = 8;
+  var CENTER = Board.CENTER;
+  var LETTERS = 'ABCD';
+  var COPY = {
+    boy: { title: "It's a Boy!", sub: '是男宝宝！💙', label: 'BOY', cn: '男宝宝', emoji: '💙', confetti: ['#a9c8ea', '#5e8fc7', '#d8e8f8', '#f3e2b3', '#c6a15b', '#ffffff'] },
+    girl: { title: "It's a Girl!", sub: '是女宝宝！💗', label: 'GIRL', cn: '女宝宝', emoji: '💗', confetti: ['#f5bccb', '#df7f9b', '#fde3ea', '#f3e2b3', '#c6a15b', '#ffffff'] }
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- state ----------
+
+  function defaultState() {
+    return {
+      names: { groom: '', bride: '' },
+      secret: '',
+      questions: cloneQuestions(window.DEFAULT_QUESTIONS),
+      game: null
+    };
+  }
+
+  function cloneQuestions(list) {
+    return list.map(function (q) {
+      var wrong = (q.wrong || []).slice(0, 3);
+      while (wrong.length < 3) wrong.push('');
+      return { q: q.q || '', answer: q.answer || '', wrong: wrong };
+    });
+  }
+
+  function load() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORE_KEY));
+      if (saved && Array.isArray(saved.questions) && saved.questions.length === QUESTION_COUNT) {
+        saved.questions = cloneQuestions(saved.questions);
+        return saved;
+      }
+    } catch (e) { /* fall through to defaults */ }
+    return defaultState();
+  }
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* private mode: keep going in memory */ }
+  }
+
+  // Light obfuscation so the answer is not sitting in plain text in storage.
+  function encodeSecret(gender) {
+    return btoa(Math.random().toString(36).slice(2, 8) + '|' + gender).split('').reverse().join('');
+  }
+  function decodeSecret(secret) {
+    try {
+      var g = atob(String(secret).split('').reverse().join('')).split('|')[1];
+      return Board.GENDERS.indexOf(g) !== -1 ? g : null;
+    } catch (e) { return null; }
+  }
+
+  var state = load();
+
+  // ---------- setup screen ----------
+
+  function coupleTitle() {
+    return (state.names.groom.trim() || '新郎') + ' & ' + (state.names.bride.trim() || '新娘');
+  }
+
+  function renderSetup() {
+    $('groom').value = state.names.groom;
+    $('bride').value = state.names.bride;
+    $('titlePreview').textContent = coupleTitle() + ' Gender Reveal';
+    renderGenderPick();
+    renderQuestions();
+    $('resumeBtn').hidden = !(state.game && !state.game.finished && decodeSecret(state.secret));
+    $('setupError').textContent = '';
+  }
+
+  function renderGenderPick() {
+    var chosen = !!decodeSecret(state.secret);
+    $('genderPick').hidden = chosen;
+    $('genderLocked').hidden = !chosen;
+  }
+
+  function renderQuestions() {
+    var list = $('questionList');
+    list.innerHTML = '';
+    state.questions.forEach(function (q, i) {
+      var golden = i === GOLDEN_Q;
+      var li = document.createElement('li');
+      li.className = 'q-item' + (golden ? ' golden' : '');
+      li.innerHTML =
+        '<header>' + (golden ? '✦ 第 9 题 · 金色格子（最后揭晓）' : '第 ' + (i + 1) + ' 题') + '</header>' +
+        '<div class="row"><input data-field="q" placeholder="问题"></div>' +
+        '<div class="answers">' +
+        '<input class="answer" data-field="answer" placeholder="✓ 正确答案">' +
+        '<input data-field="wrong" data-w="0" placeholder="错误选项（可选）">' +
+        '<input data-field="wrong" data-w="1" placeholder="错误选项（可选）">' +
+        '<input data-field="wrong" data-w="2" placeholder="错误选项（可选）">' +
+        '</div>';
+      li.querySelectorAll('input').forEach(function (input) {
+        var field = input.dataset.field;
+        var w = Number(input.dataset.w);
+        input.maxLength = field === 'q' ? 80 : 30;
+        input.value = field === 'wrong' ? q.wrong[w] : q[field];
+        input.addEventListener('input', function () {
+          if (field === 'wrong') q.wrong[w] = input.value;
+          else q[field] = input.value;
+          save();
+        });
+      });
+      list.appendChild(li);
+    });
+  }
+
+  function validateSetup() {
+    if (!state.names.groom.trim() || !state.names.bride.trim()) return '请填写新郎和新娘的名字';
+    if (!decodeSecret(state.secret)) return '请选择宝宝的性别';
+    for (var i = 0; i < state.questions.length; i++) {
+      var q = state.questions[i];
+      if (!q.q.trim() || !q.answer.trim()) return '第 ' + (i + 1) + ' 题还没有填写问题或正确答案';
+    }
+    return '';
+  }
+
+  function bindSetup() {
+    ['groom', 'bride'].forEach(function (key) {
+      $(key).addEventListener('input', function (e) {
+        state.names[key] = e.target.value;
+        $('titlePreview').textContent = coupleTitle() + ' Gender Reveal';
+        save();
+      });
+    });
+
+    document.querySelectorAll('.gender-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.secret = encodeSecret(btn.dataset.gender);
+        // A different answer means the current round no longer makes sense.
+        state.game = null;
+        save();
+        renderGenderPick();
+        $('resumeBtn').hidden = true;
+        toast('已保存，并已隐藏 🔒');
+      });
+    });
+
+    var peek = $('genderPeek');
+    var locked = $('genderLocked');
+    function showPeek() {
+      var g = decodeSecret(state.secret);
+      if (!g) return;
+      locked.classList.add('peek', g);
+      peek.textContent = COPY[g].cn + ' ' + COPY[g].emoji;
+    }
+    function hidePeek() {
+      locked.classList.remove('peek', 'boy', 'girl');
+      peek.textContent = '按住查看';
+    }
+    peek.addEventListener('pointerdown', showPeek);
+    ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(function (ev) { peek.addEventListener(ev, hidePeek); });
+
+    $('genderReset').addEventListener('click', function () {
+      state.secret = '';
+      state.game = null;
+      save();
+      renderGenderPick();
+      $('resumeBtn').hidden = true;
+    });
+
+    $('resetQuestions').addEventListener('click', function () {
+      if (!confirm('确定要用示例题目覆盖现在的题目吗？')) return;
+      state.questions = cloneQuestions(window.DEFAULT_QUESTIONS);
+      save();
+      renderQuestions();
+    });
+
+    $('startBtn').addEventListener('click', function () {
+      var err = validateSetup();
+      $('setupError').textContent = err;
+      if (err) return;
+      if (state.game && !state.game.finished && !confirm('开始新的一局会清空当前翻牌进度，确定吗？')) return;
+      state.game = { layout: Board.generateLayout(), revealed: [false, false, false, false, false, false, false, false, false], finished: false };
+      save();
+      showStage();
+    });
+
+    $('resumeBtn').addEventListener('click', showStage);
+  }
+
+  // ---------- stage ----------
+
+  var cells = [];
+  var busy = false;
+
+  function outerRevealedCount() {
+    return Board.OUTER.filter(function (i) { return state.game.revealed[i]; }).length;
+  }
+
+  function showStage() {
+    $('setup').hidden = true;
+    $('stage').hidden = false;
+    document.title = coupleTitle() + ' Gender Reveal';
+    $('nameA').textContent = state.names.groom.trim();
+    $('nameB').textContent = state.names.bride.trim();
+    buildBoard();
+    updateStatus();
+    if (state.game.finished) requestAnimationFrame(function () { drawLine(false); });
+  }
+
+  function showSetup() {
+    closeModal();
+    $('result').hidden = true;
+    $('stage').hidden = true;
+    $('setup').hidden = false;
+    document.title = 'Gender Reveal · 设置';
+    renderSetup();
+    scrollTo(0, 0);
+  }
+
+  function buildBoard() {
+    var board = $('board');
+    var gender = decodeSecret(state.secret);
+    board.innerHTML = '';
+    board.classList.toggle('done', !!state.game.finished);
+    $('lineLayer').innerHTML = '';
+    cells = [];
+    for (var i = 0; i < 9; i++) {
+      var golden = i === CENTER;
+      var color = golden ? gender : state.game.layout[i];
+      var cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'cell' + (golden ? ' golden' : '');
+      cell.dataset.i = i;
+      cell.setAttribute('role', 'gridcell');
+      cell.innerHTML =
+        '<div class="card">' +
+        (golden
+          ? '<div class="face front"><span class="shine"></span><span class="star">✦</span><span class="golden-label">Golden</span><svg class="lock"><use href="#lock"/></svg></div>'
+          : '<div class="face front"><span class="q">?</span><span class="heart">♥</span></div>') +
+        // The golden face is filled in only at reveal time, so the answer is not in the DOM before then.
+        '<div class="face back' + (golden && !state.game.revealed[i] ? '' : ' ' + color) + '">' +
+        (golden && !state.game.revealed[i] ? '' : backFace(color)) +
+        '</div></div>';
+      if (state.game.revealed[i]) cell.classList.add('revealed');
+      cell.addEventListener('click', onCellClick);
+      board.appendChild(cell);
+      cells.push(cell);
+    }
+  }
+
+  function backFace(color) {
+    var c = COPY[color];
+    return '<span class="emoji">' + c.emoji + '</span><span class="text"><span class="label">' + c.label + '</span><span class="label-cn">' + c.cn + '</span></span>';
+  }
+
+  function updateStatus() {
+    var n = outerRevealedCount();
+    var golden = cells[CENTER];
+    var allOuter = n === Board.OUTER.length;
+    golden.classList.toggle('locked', !allOuter);
+    golden.classList.toggle('ready', allOuter && !state.game.revealed[CENTER]);
+    golden.setAttribute('aria-label', allOuter ? '金色格子' : '金色格子（未解锁）');
+    cells.forEach(function (c, i) {
+      if (i !== CENTER) c.setAttribute('aria-label', state.game.revealed[i] ? COPY[state.game.layout[i]].cn : '未翻开的格子');
+    });
+
+    var tagline = $('tagline');
+    var progress = $('progress');
+    if (state.game.finished) {
+      var g = decodeSecret(state.secret);
+      tagline.textContent = COPY[g].title + ' ' + COPY[g].sub;
+      progress.textContent = '🎉 揭晓完成';
+    } else if (allOuter) {
+      tagline.textContent = '最后的答案，就藏在金色格子里……';
+      progress.textContent = '✦ 金色格子已解锁';
+    } else {
+      tagline.textContent = 'Boy or Girl? 答对问题，翻开格子';
+      progress.textContent = '已翻开 ' + n + ' / 8';
+    }
+  }
+
+  function onCellClick(e) {
+    if (busy) return;
+    var cell = e.currentTarget;
+    var i = Number(cell.dataset.i);
+    if (state.game.revealed[i]) return;
+    if (i === CENTER && outerRevealedCount() < Board.OUTER.length) {
+      shake(cell);
+      toast('先翻开外围的 8 个格子，金色格子留到最后 ✦');
+      return;
+    }
+    var qIndex = i === CENTER ? GOLDEN_Q : outerRevealedCount();
+    openQuestion(qIndex, function () { reveal(i); });
+  }
+
+  function shake(cell) {
+    cell.classList.remove('shake');
+    void cell.offsetWidth;
+    cell.classList.add('shake');
+    setTimeout(function () { cell.classList.remove('shake'); }, 500);
+  }
+
+  function reveal(i) {
+    state.game.revealed[i] = true;
+    if (i === CENTER) return revealGolden();
+    save();
+    cells[i].classList.add('revealed');
+    updateStatus();
+    if (outerRevealedCount() === Board.OUTER.length) {
+      setTimeout(function () { toast('外围全部翻开！是男是女，还看金色格子 ✦'); }, 900);
+    }
+  }
+
+  function revealGolden() {
+    var gender = decodeSecret(state.secret);
+    var golden = cells[CENTER];
+    busy = true;
+    document.body.classList.add('suspense');
+    golden.classList.remove('ready');
+
+    countdown(3, function () {
+      var back = golden.querySelector('.face.back');
+      back.classList.add(gender);
+      back.innerHTML = backFace(gender);
+      golden.classList.add('revealed');
+
+      setTimeout(function () {
+        document.body.classList.remove('suspense');
+        state.game.finished = true;
+        save();
+        drawLine(true);
+        updateStatus();
+      }, 1000);
+
+      setTimeout(function () {
+        Confetti.celebrate(COPY[gender].confetti, 1);
+        showResult(gender);
+        busy = false;
+      }, 2200);
+    });
+  }
+
+  function countdown(from, done) {
+    var box = $('countdown');
+    var span = box.querySelector('span');
+    box.hidden = false;
+    (function step(n) {
+      if (n === 0) { box.hidden = true; return done(); }
+      span.textContent = n;
+      span.style.animation = 'none';
+      void span.offsetWidth;
+      span.style.animation = '';
+      setTimeout(function () { step(n - 1); }, 1000);
+    })(from);
+  }
+
+  function drawLine(animate) {
+    var gender = decodeSecret(state.secret);
+    var line = Board.winningLine(state.game.layout, gender);
+    if (!line) return;
+    var svg = $('lineLayer');
+    var wrap = svg.getBoundingClientRect();
+    function centre(idx) {
+      var r = cells[idx].getBoundingClientRect();
+      return { x: r.left + r.width / 2 - wrap.left, y: r.top + r.height / 2 - wrap.top };
+    }
+    var a = centre(line[0]);
+    var b = centre(line[2]);
+    // Extend a little past the outer cells' centres.
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var len = Math.sqrt(dx * dx + dy * dy);
+    var ext = 0.12;
+    var x1 = a.x - dx * ext, y1 = a.y - dy * ext, x2 = b.x + dx * ext, y2 = b.y + dy * ext;
+    var total = len * (1 + 2 * ext);
+    var deep = gender === 'boy' ? '#5e8fc7' : '#df7f9b';
+    var w = cells[0].getBoundingClientRect().width;
+
+    svg.setAttribute('viewBox', '0 0 ' + wrap.width + ' ' + wrap.height);
+    svg.innerHTML =
+      '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#fff" stroke-width="' + w * 0.11 + '" opacity=".9"/>' +
+      '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#d6b26a" stroke-width="' + w * 0.075 + '"/>' +
+      '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + deep + '" stroke-width="' + w * 0.035 + '"/>';
+    svg.querySelectorAll('line').forEach(function (l) {
+      if (!animate) return;
+      l.style.strokeDasharray = total;
+      l.style.strokeDashoffset = total;
+      l.classList.add('draw');
+    });
+
+    line.forEach(function (idx) { cells[idx].classList.add('win'); });
+    $('board').classList.add('done');
+  }
+
+  addEventListener('resize', function () {
+    if (state.game && state.game.finished && !$('stage').hidden) drawLine(false);
+  });
+
+  function showResult(gender) {
+    var c = COPY[gender];
+    var box = $('result');
+    box.classList.remove('boy', 'girl');
+    box.classList.add(gender);
+    $('resultTitle').textContent = c.title;
+    $('resultSub').textContent = c.sub;
+    $('resultNames').textContent = '恭喜 ' + coupleTitle();
+    box.hidden = false;
+  }
+
+  $('resultClose').addEventListener('click', function () { $('result').hidden = true; });
+
+  // ---------- question dialog ----------
+
+  var modalDone = null;
+
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  function openQuestion(qIndex, onCorrect) {
+    var q = state.questions[qIndex];
+    var golden = qIndex === GOLDEN_Q;
+    var card = document.querySelector('#qModal .modal-card');
+    card.classList.toggle('golden', golden);
+    $('qBadge').textContent = golden ? '✦ Golden Question · 最后一题' : 'Question ' + (qIndex + 1) + ' · 第 ' + (qIndex + 1) + ' 题';
+    $('qText').textContent = q.q;
+    var feedback = $('qFeedback');
+    feedback.textContent = '';
+    feedback.className = 'q-feedback';
+    var box = $('qOptions');
+    box.innerHTML = '';
+    modalDone = onCorrect;
+
+    var wrong = q.wrong.map(function (w) { return w.trim(); }).filter(Boolean);
+    if (wrong.length) {
+      var options = shuffle([q.answer.trim()].concat(wrong));
+      box.className = 'q-options';
+      options.forEach(function (text, k) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'q-opt';
+        btn.innerHTML = '<span class="letter">' + LETTERS[k] + '</span>';
+        btn.appendChild(document.createTextNode(text));
+        btn.addEventListener('click', function () {
+          if (text === q.answer.trim()) {
+            btn.classList.add('correct');
+            box.querySelectorAll('.q-opt').forEach(function (b) { b.disabled = true; });
+            succeed();
+          } else {
+            btn.classList.add('wrong');
+            btn.disabled = true;
+            feedback.textContent = '再想想～ 🤔';
+            feedback.className = 'q-feedback bad';
+          }
+        });
+        box.appendChild(btn);
+      });
+    } else {
+      // Open question: the host hears the guests' answers and judges.
+      box.className = 'q-open';
+      var revealBtn = document.createElement('button');
+      revealBtn.type = 'button';
+      revealBtn.className = 'btn ghost';
+      revealBtn.textContent = '揭晓答案';
+      revealBtn.addEventListener('click', function () {
+        box.innerHTML = '';
+        var ans = document.createElement('p');
+        ans.className = 'q-answer';
+        ans.textContent = '答案：' + q.answer;
+        var actions = document.createElement('div');
+        actions.className = 'q-actions';
+        var yes = document.createElement('button');
+        yes.type = 'button';
+        yes.className = 'btn primary';
+        yes.textContent = '答对了 ✓ 翻开格子';
+        yes.addEventListener('click', function () { yes.disabled = true; succeed(); });
+        var no = document.createElement('button');
+        no.type = 'button';
+        no.className = 'btn ghost';
+        no.textContent = '没答对 ✗';
+        no.addEventListener('click', closeModal);
+        actions.appendChild(yes);
+        actions.appendChild(no);
+        box.appendChild(ans);
+        box.appendChild(actions);
+      });
+      box.appendChild(revealBtn);
+    }
+
+    function succeed() {
+      feedback.textContent = golden ? '答对了！准备揭晓…… ✨' : '答对了！🎉';
+      feedback.className = 'q-feedback ok';
+      $('qClose').hidden = true;
+      setTimeout(function () {
+        var done = modalDone;
+        closeModal();
+        if (done) done();
+      }, 1000);
+    }
+
+    $('qClose').hidden = false;
+    $('qModal').hidden = false;
+  }
+
+  function closeModal() {
+    modalDone = null;
+    $('qModal').hidden = true;
+  }
+
+  $('qClose').addEventListener('click', closeModal);
+  $('qModal').addEventListener('click', function (e) { if (e.target === e.currentTarget && !$('qClose').hidden) closeModal(); });
+
+  // ---------- chrome ----------
+
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+  }
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {});
+  }
+
+  $('fullscreenBtn').addEventListener('click', toggleFullscreen);
+  $('settingsBtn').addEventListener('click', function () {
+    if (busy) return;
+    if (confirm('返回设置页面？\n\n设置页可能会显示答案，请先确认来宾看不到屏幕。翻牌进度会保留。')) showSetup();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'Escape' && !$('qModal').hidden && !$('qClose').hidden) closeModal();
+    if ((e.key === 'f' || e.key === 'F') && !$('stage').hidden) toggleFullscreen();
+  });
+
+  function spawnPetals() {
+    var box = document.querySelector('.petals');
+    for (var i = 0; i < 16; i++) {
+      var p = document.createElement('span');
+      p.className = 'petal' + (i % 3 === 0 ? ' alt' : '');
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.animationDuration = 12 + Math.random() * 14 + 's';
+      p.style.animationDelay = -Math.random() * 20 + 's';
+      var s = 0.6 + Math.random() * 0.8;
+      p.style.width = 14 * s + 'px';
+      p.style.height = 18 * s + 'px';
+      box.appendChild(p);
+    }
+  }
+
+  // ---------- boot ----------
+
+  bindSetup();
+  spawnPetals();
+  if (state.game && decodeSecret(state.secret) && !validateSetup()) showStage();
+  else showSetup();
+})();

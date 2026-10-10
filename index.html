@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gender Reveal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Great+Vibes&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="petals" aria-hidden="true"></div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="gold-grad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f3e2b3"/>
+        <stop offset=".5" stop-color="#c6a15b"/>
+        <stop offset="1" stop-color="#9c7630"/>
+      </linearGradient>
+      <symbol id="rings" viewBox="0 0 120 70">
+        <circle cx="45" cy="42" r="22" fill="none" stroke="url(#gold-grad)" stroke-width="5"/>
+        <circle cx="75" cy="42" r="22" fill="none" stroke="url(#gold-grad)" stroke-width="5"/>
+        <path d="M45 20 l-6 -8 h12 z" fill="#fff" stroke="url(#gold-grad)" stroke-width="1.5"/>
+        <path d="M39 12 l6 -6 l6 6" fill="none" stroke="url(#gold-grad)" stroke-width="1.5"/>
+      </symbol>
+      <symbol id="flourish" viewBox="0 0 240 24">
+        <path d="M0 12 H90 M150 12 H240" stroke="url(#gold-grad)" stroke-width="1.2"/>
+        <path d="M120 3 C108 3 104 12 96 12 C104 12 108 21 120 21 C132 21 136 12 144 12 C136 12 132 3 120 3 Z" fill="none" stroke="url(#gold-grad)" stroke-width="1.2"/>
+        <circle cx="120" cy="12" r="3" fill="url(#gold-grad)"/>
+      </symbol>
+      <symbol id="lock" viewBox="0 0 24 24">
+        <rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/>
+        <path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ========== Setup (do this before sharing the screen) ========== -->
+  <main id="setup" class="screen" hidden>
+    <div class="setup-card frame">
+      <header class="setup-head">
+        <svg class="rings"><use href="#rings"/></svg>
+        <h1 class="script">Gender Reveal</h1>
+        <p class="hint">⚠️ 请在<strong>共享屏幕之前</strong>完成设置 · Set up before you share your screen</p>
+      </header>
+
+      <section class="step">
+        <h2><span class="step-no">1</span>新人名字 <small>Couple</small></h2>
+        <div class="name-row">
+          <label>新郎 Groom<input id="groom" maxlength="20" placeholder="例如：Jason"></label>
+          <span class="amp script">&amp;</span>
+          <label>新娘 Bride<input id="bride" maxlength="20" placeholder="例如：Emily"></label>
+        </div>
+        <p class="preview">标题预览：<span id="titlePreview" class="script"></span></p>
+      </section>
+
+      <section class="step">
+        <h2><span class="step-no">2</span>宝宝性别 <small>Baby's gender</small></h2>
+        <p class="hint">选好后会自动隐藏，可以交给医生或好友帮忙秘密选择。</p>
+        <div id="genderPick" class="gender-pick">
+          <button type="button" class="gender-btn boy" data-gender="boy">💙<span>男宝宝 · Boy</span></button>
+          <button type="button" class="gender-btn girl" data-gender="girl">💗<span>女宝宝 · Girl</span></button>
+        </div>
+        <div id="genderLocked" class="gender-locked" hidden>
+          <svg class="icon"><use href="#lock"/></svg>
+          <span>已选择 · 已隐藏</span>
+          <button type="button" id="genderPeek" class="link">按住查看</button>
+          <button type="button" id="genderReset" class="link">重新选择</button>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="step-no">3</span>闯关问题 <small>Questions</small></h2>
+        <p class="hint">
+          第 1–8 题按翻牌顺序出现，第 9 题用来解锁中间的<b class="gold-text">金色格子</b>。
+          <b class="ok-text">绿色框</b>填正确答案；填了“错误选项”就是选择题，不填就是开放题（由主持人判断对错）。
+        </p>
+        <ol id="questionList" class="question-list"></ol>
+        <button type="button" id="resetQuestions" class="link">恢复示例题目</button>
+      </section>
+
+      <p id="setupError" class="error" role="alert"></p>
+      <div class="setup-actions">
+        <button type="button" id="resumeBtn" class="btn ghost" hidden>继续当前进度</button>
+        <button type="button" id="startBtn" class="btn primary">开始揭晓 ✨</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== Stage (what guests see) ========== -->
+  <main id="stage" class="screen" hidden>
+    <header class="stage-head">
+      <svg class="rings"><use href="#rings"/></svg>
+      <h1 class="couple script"><span id="nameA"></span> <span class="amp">&amp;</span> <span id="nameB"></span></h1>
+      <p class="subtitle">Gender Reveal</p>
+      <svg class="flourish"><use href="#flourish"/></svg>
+      <p id="tagline" class="tagline">Boy or Girl? 答对问题，翻开格子</p>
+    </header>
+
+    <div class="board-wrap">
+      <div id="board" class="board" role="grid" aria-label="Gender reveal board"></div>
+      <svg id="lineLayer" class="line-layer" aria-hidden="true"></svg>
+    </div>
+
+    <footer class="stage-foot">
+      <span class="legend"><i class="dot boy"></i>Boy 男宝宝</span>
+      <span id="progress" class="progress"></span>
+      <span class="legend"><i class="dot girl"></i>Girl 女宝宝</span>
+    </footer>
+
+    <div class="corner-controls">
+      <button type="button" id="fullscreenBtn" title="全屏 (F)" aria-label="全屏">⛶</button>
+      <button type="button" id="settingsBtn" title="设置" aria-label="设置">⚙</button>
+    </div>
+  </main>
+
+  <!-- Question dialog -->
+  <div id="qModal" class="modal" hidden>
+    <div class="modal-card frame" role="dialog" aria-modal="true" aria-labelledby="qText">
+      <p id="qBadge" class="q-badge"></p>
+      <h2 id="qText" class="q-text"></h2>
+      <div id="qOptions" class="q-options"></div>
+      <p id="qFeedback" class="q-feedback" aria-live="polite"></p>
+      <button type="button" id="qClose" class="link">稍后再答</button>
+    </div>
+  </div>
+
+  <!-- Countdown before the golden slot flips -->
+  <div id="countdown" class="countdown" hidden><span></span></div>
+
+  <!-- Final result -->
+  <div id="result" class="result" hidden>
+    <div class="result-card">
+      <p class="result-pre">Congratulations</p>
+      <h2 id="resultTitle" class="result-title script"></h2>
+      <p id="resultSub" class="result-sub"></p>
+      <svg class="flourish"><use href="#flourish"/></svg>
+      <p id="resultNames" class="result-names script"></p>
+      <button type="button" id="resultClose" class="link">查看棋盘</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+
+  <script src="js/board.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
