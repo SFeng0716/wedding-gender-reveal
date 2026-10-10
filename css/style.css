@@ -249,8 +249,15 @@ input:focus, textarea:focus { outline: none; border-color: var(--gold-500); box-
   font-size: clamp(var(--text-4xl), 9.5vh, 120px);
   white-space: nowrap;
 }
-.couple .names { background: var(--gold-foil); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0 .12em; }
-.couple .amp { color: var(--gold-400); font-size: .8em; }
+/* Pinyon Script has hairline strokes: a darker foil plus a stroke thickens it enough to read across a room. */
+.couple .names {
+  background: linear-gradient(100deg, var(--gold-800) 0%, var(--gold-600) 30%, var(--gold-400) 50%, var(--gold-600) 70%, var(--gold-800) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: .022em var(--gold-700);
+  filter: drop-shadow(0 2px 0 rgba(255, 255, 255, .9)) drop-shadow(0 4px 10px rgba(107, 80, 32, .22));
+  padding: 0 .12em;
+}
+.couple .amp { color: var(--gold-600); font-size: .8em; -webkit-text-stroke: .02em var(--gold-600); }
 .subtitle {
   display: flex; align-items: center; justify-content: center; gap: var(--space-2);
   margin: 0; text-transform: uppercase;
@@ -315,17 +322,28 @@ input:focus, textarea:focus { outline: none; border-color: var(--gold-500); box-
 }
 .face.back.boy { background: var(--boy-grad); }
 .face.back.girl { background: var(--girl-grad); }
-.face.back::after { content: ''; position: absolute; inset: 7%; border: 1px solid rgba(255, 255, 255, .6); border-radius: 10px; }
-/* the heart sits dead centre so the winning line runs through it, not the text */
+.face.back::after { content: ''; position: absolute; inset: 6%; border: 1px solid rgba(255, 255, 255, .55); border-radius: 10px; }
+/*
+ * Symmetric stack: English label above, Chinese below, heart dead centre —
+ * so the winning line runs through the heart and never strikes the words.
+ */
+.face.back > * { line-height: 1; }
+.face.back .label {
+  grid-row: 1; align-self: end; margin-bottom: calc(var(--size) * .014);
+  font-family: var(--font-caps); font-size: calc(var(--size) * .042); font-weight: 700;
+  letter-spacing: var(--tracking-wider); padding-left: var(--tracking-wider);
+}
 .face.back .heart-icon {
   grid-row: 2; display: block;
-  width: calc(var(--size) * .085); height: calc(var(--size) * .085);
+  width: calc(var(--size) * .072); height: calc(var(--size) * .072);
   fill: rgba(255, 255, 255, .95);
   filter: drop-shadow(0 2px 4px rgba(46, 35, 29, .18));
 }
-.face.back .text { grid-row: 3; align-self: start; display: flex; flex-direction: column; align-items: center; line-height: 1.15; padding-top: calc(var(--size) * .006); }
-.face.back .label { font-family: var(--font-caps); font-size: calc(var(--size) * .05); font-weight: 700; letter-spacing: var(--tracking-wider); padding-left: var(--tracking-wider); }
-.face.back .label-cn { font-family: var(--font-brush-cn); font-size: calc(var(--size) * .035); }
+.face.back .label-cn {
+  grid-row: 3; align-self: start; margin-top: calc(var(--size) * .014);
+  font-family: var(--font-display-cn); font-size: calc(var(--size) * .034);
+  letter-spacing: .2em; padding-left: .2em;
+}
 
 /* golden centre */
 .cell.golden .face.front {
