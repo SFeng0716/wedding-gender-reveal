@@ -75,8 +75,12 @@
         <h2><span class="step-no">3</span>闯关问题 <small>Questions</small></h2>
         <p class="hint">
           第 1–8 题按翻牌顺序出现，第 9 题用来解锁中间的<b class="gold-text">金色格子</b>。
-          <b class="ok-text">绿色框</b>填正确答案；填了“错误选项”就是选择题，不填就是开放题（由主持人判断对错）。
+          填了错误选项就是<b>选择题</b>（选项会随机排列）；错误选项全部留空就是<b>开放题</b>，由主持人判断对错。
         </p>
+        <div class="legend-chips">
+          <span class="chip correct"><i class="mark">✓</i>绿色实线框 = 正确答案（必填）</span>
+          <span class="chip wrong"><i class="mark">✗</i>粉色虚线框 = 错误选项（可选）</span>
+        </div>
         <ol id="questionList" class="question-list"></ol>
         <button type="button" id="resetQuestions" class="link">恢复示例题目</button>
       </section>
